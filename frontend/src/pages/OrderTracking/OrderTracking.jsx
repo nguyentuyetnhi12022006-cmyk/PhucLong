@@ -348,7 +348,7 @@ const OrderTracking = () => {
                       <div className="info-line">
                         <span className="lbl">Thanh toán:</span>
                         <span className={`val badge-pay ${order.paymentStatus === 'Paid' ? 'paid' : 'pending'}`}>
-                          {order.paymentStatus === 'Paid' ? '🟢 THANH TOÁN THÀNH CÔNG' : '🟡 Đang chờ xác thực thanh toán'}
+                          {order.paymentStatus === 'Paid' ? '🟢 THANH TOÁN THÀNH CÔNG' : '🟡 CHƯA THANH TOÁN'}
                         </span>
                       </div>
                     </div>
@@ -397,9 +397,6 @@ const OrderTracking = () => {
                         customerPhone={order.customerPhone} 
                         isInline={true} 
                         initialPaymentStatus={order.paymentStatus}
-                        onStatusChange={(newStatus) => {
-                          setOrders(prev => prev.map(o => o._id === order._id ? { ...o, paymentStatus: newStatus } : o));
-                        }}
                       />
                     </div>
                   )}

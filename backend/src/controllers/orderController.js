@@ -528,78 +528,6 @@ const cancelOrder = async (req, res) => {
   }
 };
 
-// @desc    Customer claims they have transferred money for an order
-// @route   PUT /api/orders/:id/confirm-payment
-// @access  Public (requires verified token or matching customer phone)
-// Behavior: marks the order as "Pending" (customer claimed transfer).
-// The order becomes "Paid" only after an admin verifies it via
-// POST /api/orders/:id/verify-payment, or "Failed" if the admin rejects it.
-const confirmPayment = async (req, res) => {
-  try {
-    const order = await Order.findById(req.params.id);
-    if (!order) {
-      return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
-    }
-
-    const tokenUserId = getUserIdFromToken(req);
-    const bodyPhone = (req.body && req.body.customerPhone
-      ? req.body.customerPhone.toString()
-      : ''
-    ).replace(/\s/g, '');
-    const orderPhone = (order.customerPhone || '').toString().replace(/\s/g, '');
-    const isOwner =
-      (tokenUserId && order.user && tokenUserId.toString() === order.user.toString()) ||
-      (bodyPhone && orderPhone && bodyPhone === orderPhone);
-
-    if (!isOwner) {
-      return res.status(403).json({
-        success: false,
-        message: 'Bạn không có quyền xác nhận thanh toán cho đơn hàng này.',
-      });
-    }
-
-    if (order.paymentStatus === 'Paid') {
-      return res.json({
-        success: true,
-        message: 'Đơn hàng này đã được xác nhận thanh toán.',
-        data: order,
-      });
-    }
-
-    // Customer claims they transferred: record a "Pending" payment status
-    // (bank/shop still needs to verify). Never auto-mark Paid from the
-    // customer side.
-    order.paymentStatus = 'Pending';
-    const updatedOrder = await order.save();
-
-    // Notify admin: customer claims they transferred
-    await Notification.create({
-      userId: order.user || null,
-      recipient: 'admin',
-      type: 'payment_claimed',
-      title: 'Khách hàng xác nhận đã chuyển khoản 💚',
-      message: `Khách hàng ${order.customerName} (${order.customerPhone}) vừa xác nhận đã chuyển khoản cho đơn hàng #${order._id.toString().slice(-6)} (${order.totalAmount.toLocaleString()}đ). Vui lòng kiểm tra và duyệt.`,
-      orderId: order._id,
-    });
-
-    if (req.io) {
-      req.io.to('admin_room').emit('order_status_updated_admin', {
-        orderId: order._id,
-        status: order.status,
-        paymentStatus: order.paymentStatus,
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'Đơn hàng đang chờ xác nhận từ ngân hàng. Vui lòng chờ quản trị viên duyệt.',
-      data: updatedOrder,
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
 // @desc    Admin verifies / approves a customer's payment claim
 // @route   POST /api/orders/:id/verify-payment
 // @access  Private/Admin
@@ -756,7 +684,6 @@ module.exports = {
   updateOrderStatus,
   getMyOrders,
   cancelOrder,
-  confirmPayment,
   verifyPayment,
   sendThankYouMessage,
 };

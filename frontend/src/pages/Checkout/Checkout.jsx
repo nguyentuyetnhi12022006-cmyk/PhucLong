@@ -231,7 +231,7 @@ const Checkout = () => {
               <div className="order-summary-row">
                 <span>Trạng thái thanh toán:</span>
                 <span className={`order-summary-value font-semibold ${createdOrder.paymentStatus === 'Paid' ? 'text-success' : 'text-warning'}`}>
-                  {createdOrder.paymentStatus === 'Paid' ? '🟢 THANH TOÁN THÀNH CÔNG' : '🟡 Đang chờ xác thực thanh toán'}
+                  {createdOrder.paymentStatus === 'Paid' ? '🟢 THANH TOÁN THÀNH CÔNG' : '🟡 CHƯA THANH TOÁN'}
                 </span>
               </div>
               <div className="order-summary-row">
@@ -253,9 +253,6 @@ const Checkout = () => {
                   customerPhone={createdOrder.customerPhone}
                   isInline={true}
                   initialPaymentStatus={createdOrder.paymentStatus}
-                  onStatusChange={(newStatus) => {
-                    setCreatedOrder(prev => ({ ...prev, paymentStatus: newStatus }));
-                  }}
                 />
               </div>
             )}

@@ -256,7 +256,7 @@ const MyOrders = () => {
                           <div className="info-row">
                             <span className="info-label">Trạng thái TT:</span>
                             <span className={`info-value ${order.paymentStatus === 'Paid' ? 'text-success font-semibold' : ''}`}>
-                              {order.paymentStatus === 'Paid' ? '✓ Đã thanh toán' : '🟡 Đang chờ xác thực'}
+                              {order.paymentStatus === 'Paid' ? '✓ Đã thanh toán' : 'Chưa thanh toán'}
                             </span>
                           </div>
                         </div>

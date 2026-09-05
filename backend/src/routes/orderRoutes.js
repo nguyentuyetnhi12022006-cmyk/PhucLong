@@ -9,7 +9,6 @@ const {
   updateOrderStatus,
   getMyOrders,
   cancelOrder,
-  confirmPayment,
   sendThankYouMessage,
   verifyPayment,
 } = require('../controllers/orderController');
@@ -17,7 +16,6 @@ const { protect, admin } = require('../middleware/auth');
 
 router.post('/guest', createGuestOrder);
 router.get('/track', trackOrder);
-router.put('/:id/confirm-payment', confirmPayment);
 router.post('/:id/verify-payment', protect, admin, verifyPayment);
 
 router.route('/')

@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { QrCode, Clock, RefreshCw, Copy, Check, ShieldCheck, X, CheckCircle2 } from 'lucide-react';
 import { BANK_CONFIG, generateVietQRUrl } from '../config/bankConfig';
-import api from '../services/api';
 import './QRPaymentModal.css';
 
-const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = false, initialPaymentStatus = 'Pending', onStatusChange }) => {
+const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = false, initialPaymentStatus = 'Pending' }) => {
   // 10 minutes = 600 seconds
   const [timeLeft, setTimeLeft] = useState(600);
   const [copiedAcc, setCopiedAcc] = useState(false);
   const [copiedContent, setCopiedContent] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(initialPaymentStatus);
-  const [confirming, setConfirming] = useState(false);
-  const [confirmError, setConfirmError] = useState('');
 
   // Countdown timer logic
   useEffect(() => {
@@ -50,54 +47,6 @@ const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = fa
     }
   };
 
-  const handleConfirmPayment = async () => {
-    setConfirming(true);
-    setConfirmError('');
-    try {
-      if (orderId && !orderId.startsWith('MOCK-')) {
-        // Tell the server: customer claims they transferred.
-        // The server records the request and marks the order as
-        // "pending bank verification" — it is NOT immediately Paid.
-        const res = await api.put(`/orders/${orderId}/confirm-payment`, {
-          customerPhone,
-          claimTransfer: true,
-        });
-        const serverStatus = res.data?.data?.paymentStatus || res.data?.paymentStatus;
-
-        if (!res.data || !res.data.success) {
-          setConfirmError(res.data?.message || 'Không thể xác nhận thanh toán. Vui lòng thử lại.');
-          setConfirming(false);
-          return;
-        }
-
-        // Reflect whatever the server stored.
-        setPaymentStatus(serverStatus || 'Pending');
-        if (onStatusChange) onStatusChange(serverStatus || 'Pending');
-
-        try {
-          const localOrders = JSON.parse(localStorage.getItem('pl_orders_history') || '[]');
-          const updated = localOrders.map(
-            (o) =>
-              o._id === orderId
-                ? { ...o, paymentStatus: serverStatus || 'Pending' }
-                : o
-          );
-          localStorage.setItem('pl_orders_history', JSON.stringify(updated));
-        } catch (e) {
-          console.warn(e);
-        }
-      } else {
-        // No real order id (rare edge case): still don't auto-mark Paid.
-        setConfirmError('Không tìm thấy mã đơn hàng để xác nhận.');
-      }
-    } catch (err) {
-      console.error('API confirm payment failed:', err.message);
-      setConfirmError(err.response?.data?.message || 'Xác nhận thanh toán thất bại. Vui lòng thử lại.');
-    } finally {
-      setConfirming(false);
-    }
-  };
-
   const isExpired = timeLeft <= 0;
   const isPaid = paymentStatus === 'Paid';
 
@@ -133,8 +82,7 @@ const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = fa
           <div className="qr-waiting-status">
             <Clock size={16} />
             <span>
-              🟡 <strong>Đang chờ xác thực thanh toán</strong> — đơn hàng chỉ được xác nhận sau khi hệ
-              thống ghi nhận tiền chuyển khoản.
+              🟡 <strong>Chưa thanh toán</strong> — quản trị viên sẽ kiểm tra giao dịch và cập nhật thủ công.
             </span>
           </div>
           <div className={`qr-timer-banner ${isExpired ? 'timer-expired' : 'timer-active'}`}>
@@ -235,25 +183,9 @@ const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = fa
 
           {!isPaid ? (
             <div className="qr-action-box">
-              {orderId ? (
-                <>
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-confirm-qr-payment"
-                    onClick={handleConfirmPayment}
-                    disabled={confirming}
-                  >
-                    {confirming ? 'Đang xác nhận...' : '🟢 Tôi Đã Chuyển Khoản Thành Công'}
-                  </button>
-                  {confirmError && <p className="qr-confirm-error">⚠️ {confirmError}</p>}
-                  <p className="qr-tip-small">💡 Nhấp vào nút trên sau khi quét mã QR để hệ thống ghi nhận yêu cầu chuyển khoản. Thanh toán chỉ được xác nhận khi ngân hàng xác nhận hoặc quản trị viên duyệt.</p>
-                </>
-              ) : (
-                <p className="qr-waiting-note">
-                  🟡 Đơn hàng chưa được tạo. Sau khi bấm <strong>Đặt Hàng</strong>, bạn sẽ xác nhận chuyển
-                  khoản tại bước tiếp theo.
-                </p>
-              )}
+              <p className="qr-waiting-note">
+                💡 Sau khi chuyển khoản đúng số tiền, quản trị viên sẽ kiểm tra giao dịch và xác nhận thanh toán bằng tay.
+              </p>
             </div>
           ) : (
             <div className="qr-success-confirmed-msg">
