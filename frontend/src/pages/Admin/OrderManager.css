@@ -8,6 +8,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   gap: 20px;
   background-color: var(--color-bg-card);
   padding: 16px 20px;
@@ -18,8 +19,10 @@
 
 .status-filter-buttons {
   display: flex;
+  flex: 1 1 560px;
   gap: 8px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .filter-btn {
@@ -47,6 +50,9 @@
 .btn-refresh-orders {
   padding: 8px 16px;
   font-size: 0.85rem;
+  flex: 0 0 auto;
+  min-width: 104px;
+  white-space: nowrap;
 }
 
 .customer-cell-info {
