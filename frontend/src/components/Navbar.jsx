@@ -250,11 +250,6 @@ const Navbar = () => {
           <Link to="/privacy" className={`nav-link ${isActive('/privacy')}`}>
             Chính sách & Bảo mật
           </Link>
-          {isAdmin && (
-            <Link to="/admin" className={`nav-link ${isActive('/admin')}`}>
-              Trang Quản Trị
-            </Link>
-          )}
         </div>
 
         {/* Right Actions */}
@@ -514,11 +509,6 @@ const Navbar = () => {
             <Link to="/profile" className={`mobile-nav-link ${isActive('/profile')}`}>
               👤 Trang Cá Nhân ({user?.username})
             </Link>
-            {isAdmin && (
-              <Link to="/admin" className="mobile-nav-link">
-                Trang quản trị Admin ({pendingCount} đơn chờ duyệt)
-              </Link>
-            )}
             <button onClick={logout} className="mobile-nav-link mobile-logout-btn">
               Đăng xuất
             </button>
