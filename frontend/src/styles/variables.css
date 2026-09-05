@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+:root {
+  /* Colors */
+  --color-primary: #0C513F;
+  --color-primary-light: #186A55;
+  --color-primary-dark: #073529;
+  --color-primary-rgb: 12, 81, 63;
+  
+  --color-secondary: #C5A880;
+  --color-secondary-light: #D5BEA1;
+  --color-secondary-dark: #A68A62;
+  --color-secondary-rgb: 197, 168, 128;
+  
+  --color-bg: #FAF7F2;
+  --color-bg-card: #FFFFFF;
+  
+  --color-text: #202E27;
+  --color-text-light: #52665C;
+  --color-text-muted: #83978D;
+  
+  --color-success: #2E7D32;
+  --color-danger: #C62828;
+  --color-warning: #EF6C00;
+  --color-info: #1565C0;
+  
+  --color-border: #E8E2D9;
+  --color-border-light: #F1ECE3;
+  
+  /* Typography */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Outfit', sans-serif;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(12, 81, 63, 0.04);
+  --shadow-md: 0 8px 16px rgba(12, 81, 63, 0.08);
+  --shadow-lg: 0 16px 32px rgba(12, 81, 63, 0.12);
+  --shadow-gold: 0 8px 24px rgba(197, 168, 128, 0.2);
+  
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Layout */
+  --max-width: 1200px;
+  --header-height: 80px;
+}

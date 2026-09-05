@@ -1,0 +1,154 @@
+.member-manager-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Alert Box */
+.alert-message {
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  animation: slideDown 0.3s ease;
+}
+
+.success-alert {
+  background-color: #e8f5e9;
+  border: 1px solid #c8e6c9;
+  color: #2e7d32;
+}
+
+.danger-alert {
+  background-color: #ffebee;
+  border: 1px solid #ffcdd2;
+  color: #c62828;
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Current user highlighting */
+.current-user-row {
+  background-color: rgba(12, 81, 63, 0.02);
+}
+
+.current-user-tag {
+  color: var(--color-primary);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* User avatar and cell */
+.user-profile-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-avatar-badge.admin-avatar {
+  background-color: rgba(12, 81, 63, 0.1);
+  color: var(--color-primary);
+}
+
+.user-avatar-badge.user-avatar {
+  background-color: rgba(197, 168, 128, 0.15);
+  color: var(--color-secondary);
+}
+
+.user-profile-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.username-text {
+  color: var(--color-primary-dark);
+  font-size: 0.95rem;
+}
+
+/* Role Badges */
+.role-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.role-badge.admin {
+  background-color: rgba(12, 81, 63, 0.08);
+  color: var(--color-primary-dark);
+  border: 1px solid rgba(12, 81, 63, 0.15);
+}
+
+.role-badge.user {
+  background-color: #f1f3f5;
+  color: var(--color-text);
+  border: 1px solid #e2e8f0;
+}
+
+.date-joined-text {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+}
+
+/* Member Action Buttons */
+.btn-action-member {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-action-member.promote {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.btn-action-member.promote:hover {
+  background-color: #2e7d32;
+  color: #ffffff;
+}
+
+.btn-action-member.demote {
+  background-color: #fff3e0;
+  color: #ef6c00;
+  border-color: #ffe0b2;
+}
+
+.btn-action-member.demote:hover {
+  background-color: #ef6c00;
+  color: #ffffff;
+}
+
+.btn-action.delete-member {
+  margin-left: 8px;
+}
+
+.actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}

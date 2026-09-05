@@ -1,0 +1,246 @@
+.product-manager-component {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.product-manager-header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.admin-product-thumb {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+}
+
+.product-category-pill {
+  display: inline-block;
+  background-color: var(--color-bg);
+  color: var(--color-primary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+}
+
+.featured-dot-yes {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-success);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.featured-dot-no {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.product-actions-btn-group {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-edit:hover {
+  color: var(--color-info);
+  border-color: var(--color-info);
+  background-color: rgba(21, 101, 192, 0.04);
+}
+
+.btn-delete:hover {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+  background-color: rgba(198, 40, 40, 0.04);
+}
+
+/* Toggle Switch Styling */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-text-muted);
+  transition: .3s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: var(--color-primary);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+/* Modal Form styling */
+.product-form-modal {
+  max-width: 720px;
+  max-height: 95vh;
+}
+
+.product-form-body {
+  display: flex;
+  flex-direction: column;
+  height: calc(95vh - 70px);
+  overflow: hidden;
+}
+
+.product-form-scroll {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 30px;
+}
+
+.form-grid-2-col {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 20px;
+}
+
+.select-control {
+  cursor: pointer;
+}
+
+.checkboxes-row {
+  display: flex;
+  gap: 20px;
+  margin: 10px 0 28px 0;
+}
+
+.checkbox-label-card {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  background-color: var(--color-bg);
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: var(--transition-fast);
+}
+
+.checkbox-label-card:hover {
+  border-color: var(--color-primary-light);
+}
+
+.custom-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+/* Toppings Selection */
+.form-group-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--color-primary-dark);
+  font-size: 0.95rem;
+}
+
+.toppings-check-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+}
+
+.topping-checkbox-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.topping-checkbox-card:hover {
+  border-color: var(--color-primary-light);
+  background-color: rgba(12, 81, 63, 0.01);
+}
+
+.topping-checkbox-card.active {
+  border-color: var(--color-primary);
+  background-color: rgba(12, 81, 63, 0.04);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.topping-chk-name {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.topping-checkbox-card.active .topping-chk-name {
+  color: var(--color-primary-dark);
+  font-weight: 600;
+}
+
+.topping-chk-price {
+  font-size: 0.82rem;
+  color: var(--color-text-light);
+  font-weight: 600;
+}
+
+.topping-checkbox-card.active .topping-chk-price {
+  color: var(--color-primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .form-grid-2-col {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
+  .checkboxes-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .toppings-check-grid {
+    grid-template-columns: 1fr;
+  }
+}

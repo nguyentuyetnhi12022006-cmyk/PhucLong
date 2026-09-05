@@ -1,0 +1,221 @@
+.login-register-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg);
+  position: relative;
+  overflow: hidden;
+  padding: calc(var(--header-height) + 40px) 20px 80px 20px;
+}
+
+.auth-card-glow {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background-color: var(--color-secondary);
+  filter: blur(140px);
+  opacity: 0.12;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.auth-card {
+  background-color: var(--color-bg-card);
+  width: 100%;
+  max-width: 440px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 2;
+  border: 1px solid var(--color-border-light);
+  overflow: hidden;
+}
+
+/* Tabs */
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.auth-tab-btn {
+  padding: 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-light);
+  background-color: var(--color-border-light);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-align: center;
+}
+
+.auth-tab-btn:hover {
+  color: var(--color-primary);
+}
+
+.auth-tab-btn.active {
+  background-color: var(--color-bg-card);
+  color: var(--color-primary);
+  border-bottom: 3px solid var(--color-primary);
+}
+
+.auth-body {
+  padding: 40px;
+}
+
+.auth-brand-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.auth-brand-header h3 {
+  color: var(--color-primary-dark);
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.auth-brand-header p {
+  font-size: 0.88rem;
+  color: var(--color-text-light);
+}
+
+/* Alerts */
+.auth-alert {
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  margin-bottom: 24px;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.error-alert {
+  background-color: rgba(198, 40, 40, 0.04);
+  color: var(--color-danger);
+  border-left: 4px solid var(--color-danger);
+}
+
+.success-alert {
+  background-color: rgba(46, 125, 50, 0.04);
+  color: var(--color-success);
+  border-left: 4px solid var(--color-success);
+}
+
+.btn-auth-submit {
+  width: 100%;
+  padding: 14px;
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .auth-body {
+    padding: 30px 20px;
+  }
+}
+
+/* Register method toggle styling */
+.register-method-toggle-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.toggle-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text-dark, #3b3528);
+}
+
+.register-method-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background-color: #f5efe6;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid rgba(12, 81, 63, 0.08);
+}
+
+.register-method-tab {
+  padding: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: transparent;
+  color: #665c49;
+  transition: all 0.2s ease;
+  border: none;
+  text-align: center;
+}
+
+.register-method-tab.active {
+  background-color: #ffffff;
+  color: #0c513f;
+  box-shadow: 0 2px 8px rgba(12, 81, 63, 0.08);
+}
+
+/* Forgot password additions */
+.label-with-forgot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.label-with-forgot label {
+  margin-bottom: 0;
+}
+
+.btn-forgot-link {
+  background: none;
+  border: none;
+  color: #0c513f;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.btn-forgot-link:hover {
+  color: #05261e;
+}
+
+.auth-forgot-header-bar {
+  padding: 16px;
+  background-color: #f5efe6;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.btn-back-login {
+  background: none;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0c513f;
+  cursor: pointer;
+}
+
+.btn-back-login:hover {
+  text-decoration: underline;
+}
+
+.info-alert {
+  background-color: #e8f5e9;
+  color: #0c513f;
+  border-left: 4px solid #0c513f;
+}
+
