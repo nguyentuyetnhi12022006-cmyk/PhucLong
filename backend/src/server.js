@@ -99,8 +99,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start HTTP + Socket.io Server
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`Real-time Server running on port ${PORT}`);
-});
+// Start the HTTP server locally. Vercel imports the Express app as a function.
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  server.listen(PORT, () => {
+    console.log(`Real-time Server running on port ${PORT}`);
+  });
+}
+
+module.exports = app;
