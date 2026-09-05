@@ -364,6 +364,35 @@
   color: #92400e;
 }
 
+/* Marker money row inside tracking */
+.tracking-info-col .tx-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-tx {
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.tx-error {
+  color: var(--color-danger);
+  font-size: 0.85rem;
+}
+
+.tx-done {
+  color: var(--color-success);
+  font-size: 0.85rem;
+}
+
+.badge-pay.awaiting {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 /* Items Box */
 .tracking-items-box {
   display: flex;

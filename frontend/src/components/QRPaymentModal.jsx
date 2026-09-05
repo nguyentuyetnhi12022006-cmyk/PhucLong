@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QrCode, Clock, RefreshCw, Copy, Check, ShieldCheck, X, CheckCircle2 } from 'lucide-react';
 import { BANK_CONFIG, generateVietQRUrl } from '../config/bankConfig';
+import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import './QRPaymentModal.css';
 
 const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = false, initialPaymentStatus = 'Pending' }) => {
@@ -10,7 +12,9 @@ const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = fa
   const [copiedAcc, setCopiedAcc] = useState(false);
   const [copiedContent, setCopiedContent] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(initialPaymentStatus);
+  const [confirming, setConfirming] = useState(false);
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   // Countdown timer logic
   useEffect(() => {
@@ -49,10 +53,24 @@ const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = fa
     }
   };
 
-  const handlePaymentConfirmation = () => {
-    if (orderId) {
-      navigate(`/tracking?id=${orderId}`);
+  const handlePaymentConfirmation = async () => {
+    if (!orderId) return;
+
+    // Notify the backend that the customer has transferred money so the
+    // tracking page shows "ĐÃ CHUYỂN KHOẢN — CHỜ XÁC NHẬN" instead of
+    // "CHƯA THANH TOÁN" until an admin confirms the payment.
+    if (isAuthenticated && paymentStatus !== 'Paid' && paymentStatus !== 'AwaitingConfirm') {
+      setConfirming(true);
+      try {
+        await api.post(`/orders/${orderId}/mark-sent-money`);
+      } catch (err) {
+        console.warn('Could not notify admin of transfer:', err.message);
+      } finally {
+        setConfirming(false);
+      }
     }
+
+    navigate(`/tracking?id=${orderId}`);
   };
 
   const isExpired = timeLeft <= 0;
@@ -195,9 +213,9 @@ const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = fa
                 type="button"
                 className="qr-payment-confirm-button"
                 onClick={handlePaymentConfirmation}
-                disabled={!orderId}
+                disabled={!orderId || confirming}
               >
-                Tôi đã thanh toán
+                {confirming ? 'Đang ghi nhận...' : 'Tôi đã thanh toán'}
               </button>
             </div>
           ) : (

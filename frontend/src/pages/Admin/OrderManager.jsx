@@ -246,8 +246,8 @@ const OrderManager = () => {
                   <td>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: '0.85rem' }}>
                       <span className="font-semibold">{order.paymentMethod === 'QR' ? '📱 Mã QR' : '💵 COD'}</span>
-                      <span className={`badge ${order.paymentStatus === 'Paid' ? 'badge-completed' : 'badge-pending'}`} style={{ fontSize: '0.72rem', padding: '2px 6px', width: 'fit-content' }}>
-                        {order.paymentStatus === 'Paid' ? 'Đã TT' : 'Chưa TT'}
+                      <span className={`badge ${order.paymentStatus === 'Paid' ? 'badge-completed' : order.paymentStatus === 'AwaitingConfirm' ? 'badge-processing' : 'badge-pending'}`} style={{ fontSize: '0.72rem', padding: '2px 6px', width: 'fit-content' }}>
+                        {order.paymentStatus === 'Paid' ? 'Đã TT' : order.paymentStatus === 'AwaitingConfirm' ? 'Chờ XN' : 'Chưa TT'}
                       </span>
                     </div>
                   </td>
@@ -340,6 +340,7 @@ const OrderManager = () => {
                       style={{ padding: '2px 8px', fontSize: '0.85rem' }}
                     >
                       <option value="Pending">Chưa thanh toán (Pending)</option>
+                      <option value="AwaitingConfirm">Chờ xác nhận (AwaitingConfirm)</option>
                       <option value="Paid">Đã thanh toán (Paid)</option>
                       <option value="Failed">Thất bại (Failed)</option>
                     </select>

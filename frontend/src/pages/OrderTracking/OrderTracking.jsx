@@ -3,7 +3,6 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { Search, PackageCheck, Clock, Coffee, Truck, CheckCircle2, XCircle, MapPin, Phone, User, CreditCard, Tag, QrCode, AlertCircle, Copy, Check, Lock } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import QRPaymentModal from '../../components/QRPaymentModal';
 import './OrderTracking.css';
 
 const OrderTracking = () => {
@@ -19,6 +18,10 @@ const OrderTracking = () => {
   const [searched, setSearched] = useState(false);
   const [error, setError] = useState('');
   const [copiedAcc, setCopiedAcc] = useState(false);
+  const [txLoading, setTxLoading] = useState(null);
+  const [txPending, setTxPending] = useState(null);
+  const [txDone, setTxDone] = useState(null);
+  const [txError, setTxError] = useState(null);
 
   const fetchTracking = async (queryVal) => {
     const rawVal = queryVal ? queryVal.toString().trim() : '';
@@ -116,6 +119,36 @@ const OrderTracking = () => {
       month: '2-digit',
       year: 'numeric',
     });
+  };
+
+  const handleMarkSentMoney = async (order) => {
+    if (!order || !order._id) return;
+    setTxLoading(order._id);
+    setTxError(null);
+    try {
+      const res = await api.post(`/orders/${order._id}/mark-sent-money`);
+      if (res.data.success) {
+        setTxPending(null);
+        setTxDone(order._id);
+        setTxLoading(null);
+        // Refresh order state using latest backend data
+        try {
+          const refreshRes = await api.get(`/orders/${order._id}`);
+          if (refreshRes.data.success) {
+            setOrders(prev => prev.map(o => o._id === order._id ? refreshRes.data.data : o));
+          }
+        } catch {
+          // If refresh fails, keep local optimistic update but clear loading states
+        }
+      } else {
+        setTxError(order._id);
+        setTxLoading(null);
+      }
+    } catch (err) {
+      console.warn('Mark sent money failed:', err.message);
+      setTxError(order._id);
+      setTxLoading(null);
+    }
   };
 
   const handleCopy = (text) => {
@@ -344,13 +377,26 @@ const OrderTracking = () => {
                         <span className="val font-semibold text-primary">
                           {order.paymentMethod === 'QR' ? '📱 Mã QR VietQR' : '💵 Tiền mặt (COD)'}
                         </span>
-                      </div>
-                      <div className="info-line">
+                      </div>                        <div className="info-line">
                         <span className="lbl">Thanh toán:</span>
-                        <span className={`val badge-pay ${order.paymentStatus === 'Paid' ? 'paid' : 'pending'}`}>
-                          {order.paymentStatus === 'Paid' ? '🟢 THANH TOÁN THÀNH CÔNG' : '🟡 CHƯA THANH TOÁN'}
+                        <span className={`val badge-pay ${order.paymentStatus === 'Paid' ? 'paid' : order.paymentStatus === 'AwaitingConfirm' ? 'awaiting' : 'pending'}`}>
+                          {order.paymentStatus === 'Paid' ? '🟢 THANH TOÁN THÀNH CÔNG' : order.paymentStatus === 'AwaitingConfirm' ? '🟡 ĐÃ CHUYỂN KHOẢN — CHỜ XÁC NHẬN' : '🟡 CHƯA THANH TOÁN'}
                         </span>
                       </div>
+                      {order.paymentMethod === 'QR' && order.paymentStatus === 'Pending' && order.status !== 'Cancelled' && (
+                        <div className="info-line tx-row" style={{ marginTop: '6px' }}>
+                          <button
+                            type="button"
+                            className="btn btn-primary btn-tx"
+                            disabled={txLoading === order._id || txPending === order._id}
+                            onClick={() => handleMarkSentMoney(order)}
+                          >
+                            {txPending === order._id ? 'Đang gửi yêu cầu...' : 'Tôi đã chuyển khoản'}
+                          </button>
+                          {txError === order._id && <span className="tx-error">Lỗi: không thể gửi yêu cầu. Vui lòng thử lại.</span>}
+                          {txDone === order._id && !txError && <span className="tx-done">Đã ghi nhận yêu cầu chuyển khoản. Vui lòng đợi admin xác nhận.</span>}
+                        </div>
+                      )}
                     </div>
 
                     {/* Items List */}
@@ -388,18 +434,7 @@ const OrderTracking = () => {
                     </div>
                   </div>
 
-                  {/* If Payment is QR Code, show QRPaymentModal */}
-                  {order.paymentMethod === 'QR' && !isCancelled && (
-                    <div style={{ marginTop: '24px' }}>
-                      <QRPaymentModal 
-                        amount={order.totalAmount} 
-                        orderId={order._id} 
-                        customerPhone={order.customerPhone} 
-                        isInline={true} 
-                        initialPaymentStatus={order.paymentStatus}
-                      />
-                    </div>
-                  )}
+
                 </div>
               );
             })}

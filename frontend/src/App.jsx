@@ -1,7 +1,7 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+import React, { useEffect, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route, Outlet, useNavigate } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ChatWidget from './components/ChatWidget';
@@ -14,7 +14,26 @@ import UserProfile from './pages/Profile/UserProfile';
 import PrivacyPolicy from './pages/PrivacyPolicy/PrivacyPolicy';
 import AdminLogin from './pages/Admin/AdminLogin';
 import AdminLayout from './pages/Admin/AdminLayout';
+import OrderTracking from './pages/OrderTracking/OrderTracking';
 import './styles/global.css';
+
+// Whenever the user logs out, always send them back to the home page.
+// This covers every logout entry point (Navbar, mobile menu, profile, admin) so
+// screens like Checkout/QR-payment or OrderTracking can't stay on screen after logout.
+const LogoutRedirect = () => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const wasAuthenticated = useRef(isAuthenticated);
+
+  useEffect(() => {
+    if (wasAuthenticated.current && !isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+    wasAuthenticated.current = isAuthenticated;
+  }, [isAuthenticated, navigate]);
+
+  return null;
+};
 
 // Layout for customer-facing pages (includes Navbar and Footer)
 const CustomerLayout = () => {
@@ -35,6 +54,7 @@ function App() {
     <AuthProvider>
       <CartProvider>
         <Router>
+          <LogoutRedirect />
           <Routes>
             {/* Customer Routes */}
             <Route path="/" element={<CustomerLayout />}>
@@ -45,7 +65,7 @@ function App() {
               <Route path="login" element={<LoginRegister />} />
               <Route path="profile" element={<UserProfile />} />
               <Route path="my-orders" element={<UserProfile />} />
-              <Route path="tracking" element={<UserProfile />} />
+              <Route path="tracking" element={<OrderTracking />} />
               <Route path="privacy" element={<PrivacyPolicy />} />
               <Route path="terms" element={<PrivacyPolicy />} />
             </Route>

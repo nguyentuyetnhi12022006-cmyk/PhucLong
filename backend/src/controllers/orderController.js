@@ -280,7 +280,7 @@ const updateOrderStatus = async (req, res) => {
     }
 
     if (paymentStatus) {
-      const validPaymentStatuses = ['Pending', 'Paid', 'Failed'];
+      const validPaymentStatuses = ['Pending', 'Paid', 'Failed', 'AwaitingConfirm'];
       if (!validPaymentStatuses.includes(paymentStatus)) {
         return res.status(400).json({ success: false, message: 'Trạng thái thanh toán không hợp lệ.' });
       }
@@ -675,6 +675,75 @@ const sendThankYouMessage = async (req, res) => {
   }
 };
 
+const markSentMoney = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
+    }
+
+    const currentUserId = req.user?._id?.toString() || req.user?.id?.toString();
+    const orderUserId = order.user?.toString();
+
+    // Only the customer who placed the order (or an admin) can mark this
+    if (orderUserId && currentUserId && orderUserId !== currentUserId) {
+      // Allow admin users to mark on behalf of customers too
+      const User = require('../models/User');
+      try {
+        const user = await User.findById(currentUserId);
+        if (!user || user.role !== 'admin') {
+          return res.status(403).json({ success: false, message: 'Bạn không có quyền ghi nhận chuyển khoản cho đơn hàng này.' });
+        }
+      } catch {
+        return res.status(403).json({ success: false, message: 'Bạn không có quyền ghi nhận chuyển khoản cho đơn hàng này.' });
+      }
+    }
+
+    if (order.paymentStatus === 'Paid') {
+      return res.status(400).json({ success: false, message: 'Đơn hàng này đã được xác nhận thanh toán.' });
+    }
+
+    if (order.status === 'Cancelled') {
+      return res.status(400).json({ success: false, message: 'Đơn hàng đã bị hủy, không thể ghi nhận chuyển khoản.' });
+    }
+
+    // If already awaiting confirmation, just return success (idempotent)
+    if (order.paymentStatus === 'AwaitingConfirm') {
+      return res.json({
+        success: true,
+        message: 'Yêu cầu chuyển khoản đã được ghi nhận trước đó.',
+        data: order,
+      });
+    }
+
+    order.paymentStatus = 'AwaitingConfirm';
+    const updatedOrder = await order.save();
+
+    if (req.io) {
+      req.io.to('admin_room').emit('order_status_updated_admin', {
+        orderId: order._id,
+        status: order.status,
+        paymentStatus: order.paymentStatus,
+      });
+      if (order.user) {
+        req.io.to(`user_${order.user.toString()}`).emit('order_status_updated', {
+          orderId: order._id,
+          paymentStatus: order.paymentStatus,
+          paymentStatusText: 'Đã chuyển khoản — chờ xác nhận',
+        });
+      }
+    }
+
+    return res.json({
+      success: true,
+      message: 'Đã ghi nhận yêu cầu chuyển khoản. Vui lòng đợi admin xác nhận.',
+      data: updatedOrder,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   createOrder,
   createGuestOrder,
@@ -686,5 +755,6 @@ module.exports = {
   cancelOrder,
   verifyPayment,
   sendThankYouMessage,
+  markSentMoney,
 };
 

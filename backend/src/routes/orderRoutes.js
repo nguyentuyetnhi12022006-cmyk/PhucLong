@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router();
+const router = express.Router({ strict: true });
 const {
   createOrder,
   createGuestOrder,
@@ -11,12 +11,14 @@ const {
   cancelOrder,
   sendThankYouMessage,
   verifyPayment,
+  markSentMoney,
 } = require('../controllers/orderController');
 const { protect, admin } = require('../middleware/auth');
 
 router.post('/guest', createGuestOrder);
 router.get('/track', trackOrder);
 router.post('/:id/verify-payment', protect, admin, verifyPayment);
+router.post('/:id/mark-sent-money', protect, markSentMoney);
 
 router.route('/')
   .post(createOrder)
