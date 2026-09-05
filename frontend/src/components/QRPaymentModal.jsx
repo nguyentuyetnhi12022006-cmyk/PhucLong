@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { QrCode, Clock, RefreshCw, Copy, Check, ShieldCheck, X, CheckCircle2 } from 'lucide-react';
 import { BANK_CONFIG, generateVietQRUrl } from '../config/bankConfig';
 import './QRPaymentModal.css';
@@ -9,6 +10,7 @@ const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = fa
   const [copiedAcc, setCopiedAcc] = useState(false);
   const [copiedContent, setCopiedContent] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(initialPaymentStatus);
+  const navigate = useNavigate();
 
   // Countdown timer logic
   useEffect(() => {
@@ -44,6 +46,12 @@ const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = fa
     } else {
       setCopiedContent(true);
       setTimeout(() => setCopiedContent(false), 2000);
+    }
+  };
+
+  const handlePaymentConfirmation = () => {
+    if (orderId) {
+      navigate(`/tracking?id=${orderId}`);
     }
   };
 
@@ -183,9 +191,14 @@ const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = fa
 
           {!isPaid ? (
             <div className="qr-action-box">
-              <p className="qr-waiting-note">
-                💡 Sau khi chuyển khoản đúng số tiền, quản trị viên sẽ kiểm tra giao dịch và xác nhận thanh toán bằng tay.
-              </p>
+              <button
+                type="button"
+                className="qr-payment-confirm-button"
+                onClick={handlePaymentConfirmation}
+                disabled={!orderId}
+              >
+                Tôi đã thanh toán
+              </button>
             </div>
           ) : (
             <div className="qr-success-confirmed-msg">
