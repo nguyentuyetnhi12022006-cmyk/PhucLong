@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ClipboardList, Coffee, LogOut, Home, Shield, BarChart3, Ticket, Users, FileCheck, MessageCircle, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { socket, joinAdminRoom } from '../../services/socket';
@@ -15,9 +15,20 @@ import './AdminLayout.css';
 const AdminLayout = () => {
   const { isAuthenticated, isAdmin, loading, logout, user } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'orders' | 'products' | 'coupons' | 'users' | 'policies' | 'chat'
-  const [selectedChatUser, setSelectedChatUser] = useState(null);
+  const location = useLocation();
+
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'dashboard');
+  const [selectedChatUser, setSelectedChatUser] = useState(location.state?.targetUser || null);
   const [cancelNotice, setCancelNotice] = useState(null);
+
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+    if (location.state?.targetUser) {
+      setSelectedChatUser(location.state.targetUser);
+    }
+  }, [location.state]);
 
   const handleContactUser = (targetUser) => {
     setSelectedChatUser(targetUser);

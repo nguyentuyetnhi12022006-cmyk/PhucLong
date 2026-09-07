@@ -567,7 +567,7 @@ const UserProfile = () => {
                 <Users className="card-header-icon" size={20} />
                 <h3>Quản Lý Tài Khoản Khác & Phân Quyền Quản Trị</h3>
               </div>
-              <MemberManager />
+              <MemberManager onContactUser={(targetUser) => navigate('/admin', { state: { activeTab: 'chat', targetUser } })} />
             </div>
           </div>
         )}
