@@ -25,7 +25,7 @@ const Footer = () => {
             <li><Link to="/">Trang Chủ</Link></li>
             <li><Link to="/menu">Thực Đơn</Link></li>
             <li><Link to="/cart">Giỏ Hàng</Link></li>
-            <li><Link to="/tracking">Tra Cứu Đơn Hàng</Link></li>
+            <li><Link to="/profile?tab=track">Tra Cứu Đơn Hàng</Link></li>
             <li><Link to="/privacy">Chính Sách & Quyền Riêng Tư</Link></li>
           </ul>
         </div>

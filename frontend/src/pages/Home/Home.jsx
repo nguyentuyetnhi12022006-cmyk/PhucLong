@@ -306,7 +306,7 @@ const Home = () => {
                 <Link to="/privacy" className="btn btn-primary">
                   Xem Chi Tiết Chính Sách Bảo Mật <ArrowRight size={16} />
                 </Link>
-                <Link to="/tracking" className="btn btn-outline">
+                <Link to="/profile?tab=track" className="btn btn-outline">
                   <Search size={16} /> Tra Cứu Đơn Hàng Ngay
                 </Link>
               </div>

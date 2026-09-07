@@ -5,7 +5,7 @@ import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import './OrderTracking.css';
 
-const OrderTracking = () => {
+const OrderTracking = ({ embedded = false }) => {
   const { isAuthenticated } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialId = searchParams.get('id') || '';
@@ -97,10 +97,13 @@ const OrderTracking = () => {
       return;
     }
     const isPhone = /^\+?[0-9\s\-()]{8,15}$/.test(clean);
+    // Preserve the profile tab param when embedded in the profile page so
+    // reloads/switches keep landing on the "Tra Cứu Đơn Hàng" tab.
+    const tab = searchParams.get('tab');
     if (isPhone) {
-      setSearchParams({ phone: clean });
+      setSearchParams(tab ? { tab, phone: clean } : { phone: clean });
     } else {
-      setSearchParams({ id: clean });
+      setSearchParams(tab ? { tab, id: clean } : { id: clean });
     }
 
     fetchTracking(clean);
@@ -196,8 +199,8 @@ const OrderTracking = () => {
   }
 
   return (
-    <div className="order-tracking-page animate-fade-in">
-      <div className="container tracking-container">
+    <div className={`order-tracking-page animate-fade-in ${embedded ? 'embedded' : ''}`}>
+      <div className={`container tracking-container ${embedded ? 'embedded' : ''}`}>
         {/* Page Header */}
         <div className="tracking-header">
           <div className="tracking-badge-icon">

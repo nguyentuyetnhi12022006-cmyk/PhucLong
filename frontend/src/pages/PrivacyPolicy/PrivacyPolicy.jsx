@@ -218,7 +218,7 @@ const PrivacyPolicy = () => {
               <a href="tel:18006179" className="btn btn-primary btn-call">
                 <Phone size={16} /> Hotline: 1800 6179
               </a>
-              <Link to="/tracking" className="btn btn-outline btn-track">
+              <Link to="/profile?tab=track" className="btn btn-outline btn-track">
                 <Truck size={16} /> Tra Cứu Đơn Hàng
               </Link>
             </div>

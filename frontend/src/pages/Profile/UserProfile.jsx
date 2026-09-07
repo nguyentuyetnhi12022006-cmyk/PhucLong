@@ -27,15 +27,17 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { socket, joinUserRoom } from '../../services/socket';
 import api from '../../services/api';
+import OrderTracking from '../OrderTracking/OrderTracking';
 import './UserProfile.css';
 
 const UserProfile = () => {
-  const { isAuthenticated, user, logout, changePassword } = useAuth();
+  const { isAuthenticated, user, logout, changePassword, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Tab State (default or from location state)
-  const initialTab = location.state?.tab || 'info';
+  // Tab State (default, from location state, or from ?tab= query param)
+  const queryTab = new URLSearchParams(location.search).get('tab');
+  const initialTab = queryTab || location.state?.tab || 'info';
   const [activeTab, setActiveTab] = useState(initialTab);
 
   // Password Change State
@@ -54,21 +56,18 @@ const UserProfile = () => {
   const [orderFilter, setOrderFilter] = useState('all');
   const [cancellingId, setCancellingId] = useState(null);
 
-  // Track Order State
-  const [trackQuery, setTrackQuery] = useState('');
-  const [trackResult, setTrackResult] = useState(null);
-  const [trackLoading, setTrackLoading] = useState(false);
-  const [trackError, setTrackError] = useState('');
-
   useEffect(() => {
+    // Wait until the auth session check completes so we don't bounce to
+    // /login (and then possibly /admin for admin users) during a reload.
+    if (authLoading) return;
     if (!isAuthenticated) {
-      navigate('/login', { state: { from: '/profile' } });
+      navigate('/login', { state: { from: location.pathname + location.search } });
       return;
     }
     if (activeTab === 'orders') {
       fetchMyOrders();
     }
-  }, [isAuthenticated, activeTab, navigate]);
+  }, [isAuthenticated, activeTab, navigate, authLoading, location]);
 
   // Real-time Socket.io listener for customer order status changes
   useEffect(() => {
@@ -155,28 +154,6 @@ const UserProfile = () => {
     }
   };
 
-  const handleTrackSearch = async (e) => {
-    e.preventDefault();
-    if (!trackQuery.trim()) return;
-
-    setTrackLoading(true);
-    setTrackError('');
-    setTrackResult(null);
-
-    try {
-      const res = await api.get(`/orders/track?q=${encodeURIComponent(trackQuery.trim())}`);
-      if (res.data.success && res.data.data.length > 0) {
-        setTrackResult(res.data.data);
-      } else {
-        setTrackError('Không tìm thấy đơn hàng phù hợp với thông tin tra cứu.');
-      }
-    } catch (err) {
-      setTrackError('Có lỗi xảy ra khi tra cứu. Vui lòng thử lại.');
-    } finally {
-      setTrackLoading(false);
-    }
-  };
-
   const formatPrice = (val) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
 
@@ -204,7 +181,7 @@ const UserProfile = () => {
     return true;
   });
 
-  if (!isAuthenticated) return null;
+  if (authLoading || !isAuthenticated) return null;
 
   return (
     <div className="profile-page-wrapper animate-fade-in">
@@ -252,7 +229,7 @@ const UserProfile = () => {
             onClick={() => setActiveTab('track')}
           >
             <Search size={18} />
-            <span>Tra Cứu Đơn Nhanh</span>
+            <span>Tra Cứu Đơn Hàng</span>
           </button>
         </div>
 
@@ -517,78 +494,10 @@ const UserProfile = () => {
           </div>
         )}
 
-        {/* TAB 3: TRA CỨU ĐƠN NHANH */}
+        {/* TAB 3: TRA CỨU ĐƠN HÀNG (full tracking experience inside the profile) */}
         {activeTab === 'track' && (
           <div className="profile-tab-content animate-fade-in">
-            <div className="profile-card">
-              <div className="profile-card-header">
-                <Search className="card-header-icon" size={20} />
-                <h3>Tra Cứu Đơn Hàng Bất Kỳ</h3>
-              </div>
-              <div className="profile-card-body">
-                <form onSubmit={handleTrackSearch} className="track-search-form">
-                  <p className="track-hint">Nhập Mã đơn hàng hoặc Số điện thoại đặt hàng để kiểm tra tiến trình:</p>
-                  <div className="track-input-group">
-                    <input
-                      type="text"
-                      placeholder="Nhập mã đơn (vd: 64b...) hoặc SĐT đặt hàng..."
-                      value={trackQuery}
-                      onChange={(e) => setTrackQuery(e.target.value)}
-                      required
-                    />
-                    <button type="submit" className="btn-search-track" disabled={trackLoading}>
-                      <Search size={18} />
-                      <span>{trackLoading ? 'Đang tìm...' : 'Tra cứu'}</span>
-                    </button>
-                  </div>
-                </form>
-
-                {trackError && (
-                  <div className="profile-alert alert-error mt-4">
-                    <AlertCircle size={18} />
-                    <span>{trackError}</span>
-                  </div>
-                )}
-
-                {trackResult && (
-                  <div className="track-results-wrap mt-4 animate-fade-in">
-                    <h4>Kết quả tìm thấy ({trackResult.length} đơn hàng)</h4>
-                    {trackResult.map((ord) => {
-                      const st = getStatusDetails(ord.status);
-                      return (
-                        <div key={ord._id} className="track-order-result-card">
-                          <div className="result-header">
-                            <div>
-                              <span className="order-code">Mã đơn: #{ord._id.toUpperCase()}</span>
-                              <div className="order-date">{new Date(ord.createdAt).toLocaleString('vi-VN')}</div>
-                            </div>
-                            <span className={`status-pill ${st.class}`}>
-                              {st.icon} {st.text}
-                            </span>
-                          </div>
-                          <div className="result-body">
-                            <p><strong>Người nhận:</strong> {ord.customerName} ({ord.customerPhone})</p>
-                            <p><strong>Địa chỉ:</strong> {ord.shippingAddress}</p>
-                            <p><strong>Tổng tiền:</strong> <span className="highlight-price">{formatPrice(ord.totalAmount)}</span></p>
-                            {ord.status === 'Pending' && (
-                              <div className="mt-2 text-right">
-                                <button
-                                  onClick={() => handleCancelOrder(ord._id)}
-                                  disabled={cancellingId === ord._id}
-                                  className="btn-cancel-order"
-                                >
-                                  {cancellingId === ord._id ? 'Đang hủy...' : 'Hủy đơn hàng này'}
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
+            <OrderTracking embedded />
           </div>
         )}
       </div>
