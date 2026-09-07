@@ -138,14 +138,14 @@ const LiveChatManager = ({ initialTargetUser }) => {
 
         setConversations(convList);
 
-        const currentTargetId = initialTargetUser?._id || activeUserId;
+        const currentTargetId = activeUserId || initialTargetUser?._id;
         if (currentTargetId) {
           const matched = convList.find((c) => c._id === currentTargetId);
           if (matched) {
             setActiveUserId(matched._id);
             setActiveUser(matched);
             setIsDeletedUser(!!matched.isDeleted);
-          } else if (convList.length > 0) {
+          } else if (!activeUserId && convList.length > 0) {
             setActiveUserId(convList[0]._id);
             setActiveUser(convList[0]);
             setIsDeletedUser(!!convList[0].isDeleted);
