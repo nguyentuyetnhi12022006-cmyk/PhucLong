@@ -37,19 +37,35 @@ const LiveChatManager = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Format message time with the date (dd/mm HH:MM) so admins can see
+  // exactly when each message was sent.
+  const formatMsgTime = (dateStr) => {
+    const d = new Date(dateStr);
+    const today = new Date();
+    const isToday =
+      d.getDate() === today.getDate() &&
+      d.getMonth() === today.getMonth() &&
+      d.getFullYear() === today.getFullYear();
+    const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (isToday) return `Hôm nay · ${time}`;
+    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')} · ${time}`;
+  };
+
   const fetchConversations = async (isBackground = false) => {
     if (!isBackground) setLoadingConv(true);
     try {
-      const res = await api.get('/chat/conversations');
+      // Returns ALL registered customer accounts (not just users who already
+      // have messages), so the admin can start a chat with anyone.
+      const res = await api.get('/chat/users');
       if (res.data.success) {
-        setConversations(res.data.conversations);
-        if (!activeUserId && res.data.conversations.length > 0) {
-          setActiveUserId(res.data.conversations[0]._id);
-          setActiveUser(res.data.conversations[0]);
+        setConversations(res.data.users);
+        if (!activeUserId && res.data.users.length > 0) {
+          setActiveUserId(res.data.users[0]._id);
+          setActiveUser(res.data.users[0]);
         }
       }
     } catch (err) {
-      console.error('Lỗi tải danh sách hội thoại:', err);
+      console.error('Lỗi tải danh sách tài khoản:', err);
     } finally {
       if (!isBackground) setLoadingConv(false);
     }
@@ -138,7 +154,7 @@ const LiveChatManager = () => {
             </div>
           ) : filteredConversations.length === 0 ? (
             <div className="sidebar-empty">
-              <p>Chưa có cuộc hội thoại nào.</p>
+              <p>Chưa có tài khoản nào.</p>
             </div>
           ) : (
             <div className="conv-items-group">
@@ -158,7 +174,10 @@ const LiveChatManager = () => {
                     </div>
                     <div className="conv-meta">
                       <div className="conv-top-row">
-                        <span className="conv-name">{conv.username}</span>
+                        <span className="conv-name">
+                          {conv.username}
+                          {conv.phone && <span className="conv-phone"> · {conv.phone}</span>}
+                        </span>
                         <span className="conv-time">
                           {new Date(conv.updatedAt).toLocaleTimeString([], {
                             hour: '2-digit',
@@ -166,9 +185,15 @@ const LiveChatManager = () => {
                           })}
                         </span>
                       </div>
-                      <div className="conv-last-msg">
-                        {conv.lastSender === 'admin' ? 'Bạn: ' : ''}
-                        {conv.lastMessage}
+                      <div className={`conv-last-msg ${conv.hasChat ? '' : 'no-chat-yet'}`}>
+                        {!conv.hasChat ? (
+                          <span>Chưa có tin nhắn — bấm để gửi tin nhắn đầu tiên</span>
+                        ) : (
+                          <>
+                            {conv.lastSender === 'admin' ? 'Bạn: ' : ''}
+                            {conv.lastMessage}
+                          </>
+                        )}
                       </div>
                     </div>
                     {conv.unreadCount > 0 && (
@@ -220,10 +245,7 @@ const LiveChatManager = () => {
                             <div className="bubble-sender">{isAdmin ? 'Cửa Hàng Phúc Long' : activeUser.username}</div>
                             <div className="bubble-text">{msg.text}</div>
                             <div className="bubble-time">
-                              {new Date(msg.createdAt).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
+                              {formatMsgTime(msg.createdAt)}
                             </div>
                           </div>
                         </div>

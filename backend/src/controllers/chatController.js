@@ -55,6 +55,68 @@ const getMessages = async (req, res) => {
   }
 };
 
+// Get ALL registered customer accounts for the admin chat, merged with
+// conversation info (last message, unread count) where one exists.
+// This lets the admin see every created account and start a chat with any of them.
+const getChatUsers = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Quyền truy cập bị từ chối' });
+    }
+
+    // Latest message per user (only users who already have messages)
+    const conversations = await Message.aggregate([
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: '$userId',
+          lastMessage: { $first: '$text' },
+          lastSender: { $first: '$sender' },
+          lastSenderName: { $first: '$senderName' },
+          updatedAt: { $first: '$createdAt' },
+          unreadCount: {
+            $sum: {
+              $cond: [{ $and: [{ $eq: ['$sender', 'user'] }, { $eq: ['$isRead', false] }] }, 1, 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    const convByUser = new Map(conversations.map((c) => [String(c._id), c]));
+
+    // All customer accounts (excluding admins)
+    const users = await User.find({ role: 'user' }).select('username email phone createdAt').sort({ createdAt: -1 });
+
+    const populated = users.map((u) => {
+      const conv = convByUser.get(String(u._id));
+      return {
+        _id: u._id,
+        username: u.username,
+        email: u.email || '',
+        phone: u.phone || '',
+        createdAt: u.createdAt,
+        hasChat: !!conv,
+        lastMessage: conv ? conv.lastMessage : '',
+        lastSender: conv ? conv.lastSender : null,
+        lastSenderName: conv ? conv.lastSenderName : '',
+        updatedAt: conv ? conv.updatedAt : u.createdAt,
+        unreadCount: conv ? conv.unreadCount : 0,
+      };
+    });
+
+    // Users with conversations first (by recency), then accounts without chats (by creation date)
+    populated.sort((a, b) => {
+      if (a.hasChat !== b.hasChat) return a.hasChat ? -1 : 1;
+      return new Date(b.updatedAt) - new Date(a.updatedAt);
+    });
+
+    res.json({ success: true, users: populated });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Lỗi tải danh sách tài khoản', error: error.message });
+  }
+};
+
 // Get active conversations list (Admin only)
 const getConversations = async (req, res) => {
   try {
@@ -107,4 +169,5 @@ module.exports = {
   sendMessage,
   getMessages,
   getConversations,
+  getChatUsers,
 };

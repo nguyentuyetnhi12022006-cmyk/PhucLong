@@ -37,6 +37,20 @@ const ChatWidget = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Format message time with the date (dd/mm HH:MM) so customers can see
+  // exactly when each message was sent.
+  const formatMsgTime = (dateStr) => {
+    const d = new Date(dateStr);
+    const today = new Date();
+    const isToday =
+      d.getDate() === today.getDate() &&
+      d.getMonth() === today.getMonth() &&
+      d.getFullYear() === today.getFullYear();
+    const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (isToday) return `Hôm nay · ${time}`;
+    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')} · ${time}`;
+  };
+
   const fetchMessages = async (isBackground = false) => {
     if (!isBackground) setLoading(true);
     try {
@@ -162,10 +176,7 @@ const ChatWidget = () => {
                         <div className="bubble-sender">{isMe ? 'Bạn' : 'Phúc Long Support'}</div>
                         <div className="bubble-text">{msg.text}</div>
                         <div className="bubble-time">
-                          {new Date(msg.createdAt).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
+                          {formatMsgTime(msg.createdAt)}
                         </div>
                       </div>
                     </div>
