@@ -399,85 +399,58 @@ const MemberManager = ({ onContactUser }) => {
                             )}
                           </div>
                         ) : (
-                          /* Giao diện dành cho Admin gốc (Master Admin): Các nút căn giữa thành khối hàng ngang gọn gàng */
-                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-                            {!targetIsAdmin && onContactUser && (
-                              <button
-                                onClick={() => onContactUser(u)}
-                                className="btn-action-member contact"
-                                title="Nhắn tin liên hệ với khách hàng này"
-                                style={{
-                                  backgroundColor: '#0c513f',
-                                  color: '#ffffff',
-                                  border: 'none',
-                                  padding: '6px 14px',
-                                  borderRadius: '20px',
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  fontSize: '0.8rem',
-                                  fontWeight: '600',
-                                  boxShadow: '0 2px 4px rgba(12, 81, 63, 0.12)',
-                                  transition: 'all 0.2s ease',
-                                  whiteSpace: 'nowrap',
-                                }}
-                              >
-                                <MessageCircle size={14} /> Liên hệ
-                              </button>
-                            )}
-
-                            {targetIsMaster ? (
-                              <span className="text-muted text-xs font-semibold" style={{ color: '#0c513f', whiteSpace: 'nowrap' }}>
-                                Tài khoản gốc
-                              </span>
-                            ) : (
+                          /* Giao diện dành cho Admin gốc (Master Admin): Tất cả nút/nhãn ở MỌI HÀNG đều căn GIỮA 100% dưới cột Hành động */
+                          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%' }}>
+                            {!targetIsAdmin ? (
+                              /* Khách hàng: 3 nút (Liên hệ + Promote + Thùng rác) căn giữa 100% */
                               <>
-                                {!targetIsAdmin ? (
+                                {onContactUser && (
                                   <button
-                                    onClick={() => handleRoleChange(u, 'admin')}
-                                    className="btn-action-member promote"
-                                    title="Cấp quyền Admin cho tài khoản này"
+                                    onClick={() => onContactUser(u)}
+                                    className="btn-action-member contact"
+                                    title="Nhắn tin liên hệ với khách hàng này"
                                     style={{
-                                      backgroundColor: '#e6f4ea',
-                                      color: '#1e7e46',
-                                      border: '1px solid #ceebd6',
+                                      backgroundColor: '#0c513f',
+                                      color: '#ffffff',
+                                      border: 'none',
                                       padding: '6px 12px',
                                       borderRadius: '20px',
                                       cursor: 'pointer',
                                       display: 'inline-flex',
                                       alignItems: 'center',
-                                      gap: '4px',
+                                      gap: '6px',
                                       fontSize: '0.8rem',
                                       fontWeight: '600',
+                                      boxShadow: '0 2px 4px rgba(12, 81, 63, 0.12)',
+                                      transition: 'all 0.2s ease',
                                       whiteSpace: 'nowrap',
                                     }}
                                   >
-                                    <ArrowUp size={14} /> Promote
-                                  </button>
-                                ) : (
-                                  <button
-                                    onClick={() => handleRoleChange(u, 'user')}
-                                    className="btn-action-member demote"
-                                    title="Thu hồi quyền Admin của tài khoản này"
-                                    style={{
-                                      backgroundColor: '#fef3c7',
-                                      color: '#b45309',
-                                      border: '1px solid #fde68a',
-                                      padding: '6px 12px',
-                                      borderRadius: '20px',
-                                      cursor: 'pointer',
-                                      display: 'inline-flex',
-                                      alignItems: 'center',
-                                      gap: '4px',
-                                      fontSize: '0.8rem',
-                                      fontWeight: '600',
-                                      whiteSpace: 'nowrap',
-                                    }}
-                                  >
-                                    <ArrowDown size={14} /> Demote
+                                    <MessageCircle size={14} /> Liên hệ
                                   </button>
                                 )}
+
+                                <button
+                                  onClick={() => handleRoleChange(u, 'admin')}
+                                  className="btn-action-member promote"
+                                  title="Cấp quyền Admin cho tài khoản này"
+                                  style={{
+                                    backgroundColor: '#e6f4ea',
+                                    color: '#1e7e46',
+                                    border: '1px solid #ceebd6',
+                                    padding: '6px 12px',
+                                    borderRadius: '20px',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    fontSize: '0.8rem',
+                                    fontWeight: '600',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  <ArrowUp size={14} /> Promote
+                                </button>
 
                                 <button
                                   onClick={() => handleDeleteUser(u)}
@@ -500,6 +473,61 @@ const MemberManager = ({ onContactUser }) => {
                                 >
                                   <Trash2 size={16} />
                                 </button>
+                              </>
+                            ) : (
+                              /* Admin được cấp quyền: KHÔNG có nút Liên hệ. Nút Demote + Nút Thùng rác căn GIỮA 100% tuyệt đối dưới cột Hành động */
+                              <>
+                                {targetIsMaster ? (
+                                  <span className="text-muted text-xs font-semibold" style={{ color: '#0c513f', whiteSpace: 'nowrap' }}>
+                                    Tài khoản gốc
+                                  </span>
+                                ) : (
+                                  <button
+                                    onClick={() => handleRoleChange(u, 'user')}
+                                    className="btn-action-member demote"
+                                    title="Thu hồi quyền Admin của tài khoản này"
+                                    style={{
+                                      backgroundColor: '#fef3c7',
+                                      color: '#b45309',
+                                      border: '1px solid #fde68a',
+                                      padding: '6px 16px',
+                                      borderRadius: '20px',
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '4px',
+                                      fontSize: '0.8rem',
+                                      fontWeight: '600',
+                                      whiteSpace: 'nowrap',
+                                    }}
+                                  >
+                                    <ArrowDown size={14} /> Demote
+                                  </button>
+                                )}
+
+                                {!targetIsMaster && (
+                                  <button
+                                    onClick={() => handleDeleteUser(u)}
+                                    className="btn-action delete-member"
+                                    title="Xóa tài khoản"
+                                    style={{
+                                      backgroundColor: '#ffffff',
+                                      color: '#ef4444',
+                                      border: '1px solid #fee2e2',
+                                      padding: '6px 8px',
+                                      borderRadius: '6px',
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      width: '32px',
+                                      height: '32px',
+                                      margin: 0,
+                                    }}
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                                )}
                               </>
                             )}
                           </div>
