@@ -4,7 +4,6 @@ import {
   User,
   Lock,
   ShoppingBag,
-  Search,
   KeyRound,
   Shield,
   Clock,
@@ -38,7 +37,7 @@ const UserProfile = () => {
   const location = useLocation();
 
   // Tab State (default or from location state)
-  const initialTab = location.state?.tab || 'info';
+  const initialTab = location.state?.tab === 'track' ? 'tracking' : (location.state?.tab || 'info');
   const [activeTab, setActiveTab] = useState(initialTab);
 
   // Password Change State
@@ -57,11 +56,7 @@ const UserProfile = () => {
   const [orderFilter, setOrderFilter] = useState('all');
   const [cancellingId, setCancellingId] = useState(null);
 
-  // Track Order State
-  const [trackQuery, setTrackQuery] = useState('');
-  const [trackResult, setTrackResult] = useState(null);
-  const [trackLoading, setTrackLoading] = useState(false);
-  const [trackError, setTrackError] = useState('');
+
 
   const checkIsMasterAdmin = (u) => {
     if (!u) return false;
@@ -178,27 +173,7 @@ const UserProfile = () => {
     }
   };
 
-  const handleTrackSearch = async (e) => {
-    e.preventDefault();
-    if (!trackQuery.trim()) return;
 
-    setTrackLoading(true);
-    setTrackError('');
-    setTrackResult(null);
-
-    try {
-      const res = await api.get(`/orders/track?q=${encodeURIComponent(trackQuery.trim())}`);
-      if (res.data.success && res.data.data.length > 0) {
-        setTrackResult(res.data.data);
-      } else {
-        setTrackError('Không tìm thấy đơn hàng phù hợp với thông tin tra cứu.');
-      }
-    } catch (err) {
-      setTrackError('Có lỗi xảy ra khi tra cứu. Vui lòng thử lại.');
-    } finally {
-      setTrackLoading(false);
-    }
-  };
 
   const formatPrice = (val) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
@@ -310,14 +285,6 @@ const UserProfile = () => {
                 <ShoppingBag size={18} />
                 <span>Đơn Hàng Của Tôi</span>
                 {orders.length > 0 && <span className="tab-badge">{orders.length}</span>}
-              </button>
-
-              <button
-                className={`profile-tab-btn ${activeTab === 'track' ? 'active' : ''}`}
-                onClick={() => setActiveTab('track')}
-              >
-                <Search size={18} />
-                <span>Tra Cứu Đơn Nhanh</span>
               </button>
 
               <button
@@ -605,7 +572,7 @@ const UserProfile = () => {
           </div>
         )}
 
-        {/* TAB 3 & 4: TRA CỨU & THEO DÕI ĐƠN HÀNG (Chỉ dành cho khách hàng) */}
+        {/* TAB 3: THEO DÕI ĐƠN HÀNG (Chỉ dành cho khách hàng) */}
         {user?.role !== 'admin' && (activeTab === 'track' || activeTab === 'tracking') && (
           <div className="profile-tab-content animate-fade-in">
             <OrderTracking />
