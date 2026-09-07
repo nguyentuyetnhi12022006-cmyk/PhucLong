@@ -13,7 +13,6 @@ import {
   CheckCircle2,
   Clock,
   ArrowRight,
-  ShieldAlert,
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -30,17 +29,14 @@ const Navbar = () => {
   const [approvingId, setApprovingId] = useState(null);
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Customer Notifications State
-  const [userNotifs, setUserNotifs] = useState([]);
-  const [userUnreadCount, setUserUnreadCount] = useState(0);
-  const [showUserNotifDropdown, setShowUserNotifDropdown] = useState(false);
+
 
   const { cartCount } = useCart();
   const { isAuthenticated, logout, user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const notifRef = useRef(null);
-  const userNotifRef = useRef(null);
+
 
   const isAdmin = isAuthenticated && user?.role === 'admin';
 
@@ -61,7 +57,7 @@ const Navbar = () => {
   useEffect(() => {
     setIsOpen(false);
     setShowNotifDropdown(false);
-    setShowUserNotifDropdown(false);
+
   }, [location]);
 
   // Click outside to close notification dropdowns
@@ -70,9 +66,7 @@ const Navbar = () => {
       if (notifRef.current && !notifRef.current.contains(event.target)) {
         setShowNotifDropdown(false);
       }
-      if (userNotifRef.current && !userNotifRef.current.contains(event.target)) {
-        setShowUserNotifDropdown(false);
-      }
+  
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -107,34 +101,7 @@ const Navbar = () => {
     };
   }, [isAdmin]);
 
-  // Poll for Customer Notifications
-  useEffect(() => {
-    let timer;
-    const fetchCustomerNotifications = async () => {
-      if (!isAuthenticated || isAdmin) return;
-      try {
-        const res = await api.get('/notifications');
-        if (res.data.success) {
-          setUserNotifs(res.data.notifications);
-          setUserUnreadCount(res.data.unreadCount);
-        }
-      } catch (err) {
-        console.warn('Could not fetch user notifications:', err.message);
-      }
-    };
 
-    if (isAuthenticated && !isAdmin) {
-      fetchCustomerNotifications();
-      timer = setInterval(fetchCustomerNotifications, 6000);
-    } else {
-      setUserNotifs([]);
-      setUserUnreadCount(0);
-    }
-
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [isAuthenticated, isAdmin]);
 
   // Keep pendingCount strictly synchronized with pendingOrders.length
   useEffect(() => {
@@ -178,18 +145,9 @@ const Navbar = () => {
     } else if (isAuthenticated && user?._id) {
       joinUserRoom(user._id);
 
-      const handleOrderStatusUpdated = () => {
-        api.get('/notifications').then((res) => {
-          if (res.data.success) {
-            setUserNotifs(res.data.notifications);
-            setUserUnreadCount(res.data.unreadCount);
-          }
-        });
-      };
-
-      socket.on('order_status_updated', handleOrderStatusUpdated);
+      socket.on('order_status_updated', () => {});
       return () => {
-        socket.off('order_status_updated', handleOrderStatusUpdated);
+        socket.off('order_status_updated');
       };
     }
   }, [isAdmin, isAuthenticated, user]);
@@ -213,15 +171,7 @@ const Navbar = () => {
     }
   };
 
-  const markAllUserNotifRead = async () => {
-    try {
-      await api.put('/notifications/read-all');
-      setUserUnreadCount(0);
-      setUserNotifs((prev) => prev.map((n) => ({ ...n, isRead: true })));
-    } catch (err) {
-      console.error('Lỗi đánh dấu đã đọc:', err);
-    }
-  };
+
 
   const isActive = (path) => (location.pathname === path ? 'active' : '');
 
@@ -262,92 +212,7 @@ const Navbar = () => {
             </Link>
           )}
 
-          {/* CUSTOMER NOTIFICATION BELL */}
-          {isAuthenticated && !isAdmin && (
-            <div className="user-notif-wrapper" ref={userNotifRef}>
-              <button
-                className={`btn-notif-bell ${userUnreadCount > 0 ? 'has-pending' : ''} ${
-                  showUserNotifDropdown ? 'active' : ''
-                }`}
-                onClick={() => {
-                  setShowUserNotifDropdown(!showUserNotifDropdown);
-                  if (!showUserNotifDropdown && userUnreadCount > 0) {
-                    markAllUserNotifRead();
-                  }
-                }}
-                title="Thông báo đơn hàng"
-              >
-                <Bell size={20} />
-                {userUnreadCount > 0 && (
-                  <span className="bell-badge-count">
-                    {userUnreadCount > 99 ? '99+' : userUnreadCount}
-                  </span>
-                )}
-              </button>
 
-              {/* Customer Notifications Dropdown */}
-              {showUserNotifDropdown && (
-                <div className="admin-notif-dropdown animate-fade-in">
-                  <div className="notif-dropdown-header">
-                    <div className="notif-header-title">
-                      <Bell size={16} />
-                      <span>Thông báo của tôi</span>
-                    </div>
-                    {userUnreadCount > 0 && (
-                      <span className="notif-badge-pill">{userUnreadCount} mới</span>
-                    )}
-                  </div>
-
-                  <div className="notif-dropdown-body">
-                    {userNotifs.length === 0 ? (
-                      <div className="notif-empty">
-                        <CheckCircle2 size={36} className="empty-icon" />
-                        <p>Bạn chưa có thông báo nào 🍵</p>
-                      </div>
-                    ) : (
-                      userNotifs.map((notif) => (
-                        <div
-                          key={notif._id}
-                          className={`notif-order-card ${!notif.isRead ? 'unread-card' : ''}`}
-                          onClick={() => {
-                            setShowUserNotifDropdown(false);
-                            navigate('/profile', { state: { tab: 'orders' } });
-                          }}
-                        >
-                          <div className="notif-order-top">
-                            <span className="notif-order-id">{notif.title}</span>
-                            <span className="notif-order-time">
-                              <Clock size={12} />
-                              {new Date(notif.createdAt).toLocaleTimeString('vi-VN', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </span>
-                          </div>
-                          <div className="notif-order-customer" style={{ fontSize: '0.85rem' }}>
-                            {notif.message}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-
-                  <div className="notif-dropdown-footer">
-                    <button
-                      className="btn-view-all-orders"
-                      onClick={() => {
-                        setShowUserNotifDropdown(false);
-                        navigate('/profile', { state: { tab: 'orders' } });
-                      }}
-                    >
-                      <span>Xem chi tiết trong Trang Cá Nhân</span>
-                      <ArrowRight size={14} />
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
 
           {/* ADMIN QUICK-ACTION BAR */}
           {isAdmin && (
@@ -396,7 +261,11 @@ const Navbar = () => {
                               </span>
                               <span className="notif-order-time">
                                 <Clock size={12} />
-                                {new Date(order.createdAt).toLocaleTimeString('vi-VN', {
+                                {new Date(order.createdAt).toLocaleDateString('vi-VN', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                })} {new Date(order.createdAt).toLocaleTimeString('vi-VN', {
                                   hour: '2-digit',
                                   minute: '2-digit',
                                 })}

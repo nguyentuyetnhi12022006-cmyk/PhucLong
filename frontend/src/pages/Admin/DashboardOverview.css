@@ -115,6 +115,69 @@
   }
 }
 
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 14px;
+    gap: 10px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .stat-card-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .stat-card-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .stat-card-value {
+    font-size: 1.1rem;
+  }
+
+  .stat-card-title {
+    font-size: 0.65rem;
+  }
+
+  .stat-card-sub {
+    font-size: 0.6rem;
+  }
+
+  .dashboard-chart-card {
+    padding: 16px;
+  }
+
+  .chart-card-header h3 {
+    font-size: 0.9rem;
+  }
+
+  .dashboard-details-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .details-card {
+    padding: 14px;
+  }
+
+  .simple-table th,
+  .simple-table td {
+    padding: 6px 4px;
+    font-size: 0.72rem;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+}
+
 .dashboard-chart-card {
   background: #ffffff;
   border-radius: var(--radius-lg);

@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Leaf, ShieldCheck, Heart, Award, Shield, Lock, UserCheck, Search } from 'lucide-react';
 import api from '../../services/api';
-import ProductCard from '../../components/ProductCard';
+
 import ProductCustomizeModal from '../../components/ProductCustomizeModal';
 import { useCart } from '../../context/CartContext';
+
 import './Home.css';
+
+// Giúp demo offline: vài sản phẩm fallback có thời gian tạo gần đây (hiện badge MỚI)
+const hoursAgo = (h) => new Date(Date.now() - h * 60 * 60 * 1000).toISOString();
 
 const FALLBACK_FEATURED = [
   {
@@ -19,6 +23,8 @@ const FALLBACK_FEATURED = [
     toppings: [{ name: 'Trân châu hoàng kim', price: 10000 }, { name: 'Kem phô mai', price: 12000 }],
     isAvailable: true,
     isFeatured: true,
+    createdAt: hoursAgo(2),
+    updatedAt: hoursAgo(2),
   },
   {
     _id: 'fallback-2',
@@ -31,6 +37,8 @@ const FALLBACK_FEATURED = [
     toppings: [{ name: 'Thạch đào', price: 10000 }, { name: 'Thạch nha đam', price: 8000 }],
     isAvailable: true,
     isFeatured: true,
+    createdAt: hoursAgo(26),
+    updatedAt: hoursAgo(26),
   },
   {
     _id: 'fallback-3',
@@ -43,6 +51,8 @@ const FALLBACK_FEATURED = [
     toppings: [{ name: 'Thạch nha đam', price: 8000 }],
     isAvailable: true,
     isFeatured: true,
+    createdAt: hoursAgo(80),
+    updatedAt: hoursAgo(80),
   },
   {
     _id: 'fallback-4',
@@ -93,13 +103,11 @@ const Home = () => {
   const [allProducts, setAllProducts] = useState([]);
   const [coupons, setCoupons] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [activeProductTab, setActiveProductTab] = useState('best-sellers'); // 'best-sellers' | 'new-releases'
+
   const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
       try {
         const prodResponse = await api.get('/products');
         if (prodResponse.data.success && prodResponse.data.data.length > 0) {
@@ -121,8 +129,6 @@ const Home = () => {
         }
       } catch (error) {
         setCoupons(FALLBACK_COUPONS);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -131,18 +137,6 @@ const Home = () => {
 
   const formatPrice = (value) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
-  };
-
-  // Filter products for the tabs section
-  const getDisplayProducts = () => {
-    if (activeProductTab === 'best-sellers') {
-      const best = allProducts.filter(p => p.isFeatured).slice(0, 4);
-      return best.length > 0 ? best : allProducts.slice(0, 4);
-    } else {
-      // Return a slice representing "new/recommended items" (e.g. coffee or bakery items)
-      const news = allProducts.filter(p => p.category === 'Trà trái cây' || p.category === 'Cà phê').slice(0, 4);
-      return news.length > 0 ? news : allProducts.slice(1, 5);
-    }
   };
 
   // Filter products for the top 5 ranking section
@@ -324,55 +318,6 @@ const Home = () => {
                 <p>Thông tin cá nhân được mã hóa và bảo vệ theo tiêu chuẩn nghiêm ngặt nhất.</p>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Best-Selling Drinks Tabbed Section */}
-      <section className="featured-section">
-        <div className="container">
-          <div className="section-header">
-            <span className="section-subtitle">Gợi Ý Cho Bạn</span>
-            <h2 className="section-title">Danh mục đồ uống bán chạy</h2>
-            <div className="section-divider"></div>
-          </div>
-
-          {/* Tabs row */}
-          <div className="best-sellers-tabs">
-            <button
-              className={`tab-btn ${activeProductTab === 'best-sellers' ? 'active' : ''}`}
-              onClick={() => setActiveProductTab('best-sellers')}
-            >
-              Món Bán Chạy Nhất
-            </button>
-            <button
-              className={`tab-btn ${activeProductTab === 'new-releases' ? 'active' : ''}`}
-              onClick={() => setActiveProductTab('new-releases')}
-            >
-              Món Mới Khuyên Dùng
-            </button>
-          </div>
-
-          {loading ? (
-            <div className="loading-spinner-container">
-              <div className="loading-spinner"></div>
-            </div>
-          ) : (
-            <div className="products-grid">
-              {getDisplayProducts().map((product) => (
-                <ProductCard
-                  key={product._id}
-                  product={product}
-                  onSelect={(p) => setSelectedProduct(p)}
-                />
-              ))}
-            </div>
-          )}
-
-          <div className="featured-footer">
-            <Link to="/menu" className="btn btn-primary hero-btn-pill btn-view-menu-all">
-              Xem tất cả thực đơn đặt món <ArrowRight size={18} />
-            </Link>
           </div>
         </div>
       </section>

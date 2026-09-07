@@ -1,14 +1,17 @@
 import React from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Star, Sparkles } from 'lucide-react';
+import { isNewProduct } from '../utils/timeUtils';
 import './ProductCard.css';
 
 const ProductCard = ({ product, onSelect }) => {
-  const { name, description, price, category, image, isAvailable } = product;
+  const { name, description, price, category, image, isAvailable, isFeatured } = product;
 
   // Format price to VND
   const formatPrice = (value) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
   };
+
+  const isNew = isNewProduct(product);
 
   return (
     <div className={`product-card ${!isAvailable ? 'sold-out' : ''}`}>
@@ -20,6 +23,20 @@ const ProductCard = ({ product, onSelect }) => {
           loading="lazy"
         />
         <span className="product-category-tag">{category}</span>
+        {(isFeatured || isNew) && (
+          <div className="product-badges">
+            {isFeatured && (
+              <span className="badge-product badge-best-seller">
+                <Star size={11} fill="currentColor" /> Best Seller
+              </span>
+            )}
+            {isNew && (
+              <span className="badge-product badge-new">
+                <Sparkles size={11} /> Mới
+              </span>
+            )}
+          </div>
+        )}
         {!isAvailable && <div className="sold-out-overlay">Hết Hàng</div>}
       </div>
 

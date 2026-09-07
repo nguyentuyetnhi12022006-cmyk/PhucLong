@@ -55,6 +55,51 @@
   letter-spacing: 0.5px;
 }
 
+/* Badges: Best Seller + Mới (góc phải trên ảnh) */
+.product-badges {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.badge-product {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+.badge-best-seller {
+  background: linear-gradient(135deg, #b8860b 0%, #e6b84c 100%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.badge-new {
+  background: linear-gradient(135deg, #ef5350 0%, #d32f2f 100%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+@media (max-width: 480px) {
+  .badge-product {
+    font-size: 0.62rem;
+    padding: 3px 8px;
+  }
+}
+
 .sold-out-overlay {
   position: absolute;
   top: 0;

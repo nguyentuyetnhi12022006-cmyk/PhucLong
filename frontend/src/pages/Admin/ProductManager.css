@@ -243,4 +243,36 @@
   .toppings-check-grid {
     grid-template-columns: 1fr;
   }
+
+  .product-manager-header {
+    margin-bottom: 12px;
+  }
+
+  .product-form-modal {
+    width: 95% !important;
+    max-height: 90vh !important;
+  }
+
+  .product-form-scroll {
+    padding: 16px;
+  }
+
+  .admin-table-container {
+    overflow-x: auto;
+  }
+
+  .admin-table {
+    min-width: 500px;
+    font-size: 0.8rem;
+  }
+
+  .admin-table thead th {
+    font-size: 0.7rem;
+    padding: 8px 6px;
+  }
+
+  .admin-table tbody td {
+    padding: 8px 6px;
+    font-size: 0.75rem;
+  }
 }
