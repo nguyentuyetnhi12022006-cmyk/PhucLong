@@ -173,7 +173,7 @@ const AdminLayout = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="admin-main-content">
+      <main className={`admin-main-content ${activeTab === 'chat' ? 'chat-mode' : ''}`}>
         <header className="admin-header">
           <div className="header-left">
             <h2>

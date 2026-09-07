@@ -116,7 +116,7 @@ const LiveChatManager = ({ initialTargetUser }) => {
       if (res.data.success) {
         let convList = res.data.conversations;
 
-        // If initialTargetUser exists and isn't in convList, add it
+        // If initialTargetUser exists and isn't in convList, add it as a draft item
         if (initialTargetUser && initialTargetUser._id) {
           const exists = convList.some((c) => c._id === initialTargetUser._id);
           if (!exists) {
@@ -125,11 +125,12 @@ const LiveChatManager = ({ initialTargetUser }) => {
                 _id: initialTargetUser._id,
                 username: initialTargetUser.username || 'Khách hàng',
                 email: initialTargetUser.email || '',
-                lastMessage: 'Bắt đầu cuộc trò chuyện mới...',
-                lastSender: 'admin',
-                updatedAt: new Date().toISOString(),
+                lastMessage: '',
+                lastSender: '',
+                updatedAt: null,
                 unreadCount: 0,
                 isDeleted: initialTargetUser.isDeleted || false,
+                isDraft: true,
               },
               ...convList,
             ];
@@ -222,6 +223,19 @@ const LiveChatManager = ({ initialTargetUser }) => {
         targetUserId: activeUserId,
       });
       if (res.data.success) {
+        setConversations((prev) =>
+          prev.map((c) =>
+            c._id === activeUserId
+              ? {
+                  ...c,
+                  isDraft: false,
+                  lastMessage: textToSend || '[Hình ảnh]',
+                  lastSender: 'admin',
+                  updatedAt: new Date().toISOString(),
+                }
+              : c
+          )
+        );
         fetchMessages(activeUserId, true);
         fetchConversations(true);
       }
@@ -232,6 +246,22 @@ const LiveChatManager = ({ initialTargetUser }) => {
     } finally {
       setSending(false);
     }
+  };
+
+  const handleSelectConversation = (targetConv) => {
+    if (targetConv._id === activeUserId) return;
+
+    // If current active conversation was an unsent draft with no messages, remove it from list
+    if (activeUserId) {
+      const currentActiveConv = conversations.find((c) => c._id === activeUserId);
+      if (currentActiveConv && currentActiveConv.isDraft && messages.length === 0) {
+        setConversations((prev) => prev.filter((c) => c._id !== activeUserId));
+      }
+    }
+
+    setActiveUserId(targetConv._id);
+    setActiveUser(targetConv);
+    setIsDeletedUser(!!targetConv.isDeleted);
   };
 
   const handleDeleteConversation = async (userId, username) => {
@@ -307,15 +337,13 @@ const LiveChatManager = ({ initialTargetUser }) => {
               {filteredConversations.map((conv) => {
                 const isActive = activeUserId === conv._id;
                 const displayName = conv.isDeleted ? 'Khách hàng' : conv.username;
+                const isDraftConv = conv.isDraft || (!conv.lastMessage && (conv.unreadCount === 0 || !conv.unreadCount));
+
                 return (
                   <div
                     key={conv._id}
                     className={`conv-item-card ${isActive ? 'active' : ''} ${conv.isDeleted ? 'deleted-conv' : ''}`}
-                    onClick={() => {
-                      setActiveUserId(conv._id);
-                      setActiveUser(conv);
-                      setIsDeletedUser(!!conv.isDeleted);
-                    }}
+                    onClick={() => handleSelectConversation(conv)}
                   >
                     <div className="conv-avatar">
                       {displayName?.[0]?.toUpperCase() || 'K'}
@@ -323,13 +351,21 @@ const LiveChatManager = ({ initialTargetUser }) => {
                     <div className="conv-meta">
                       <div className="conv-top-row">
                         <span className="conv-name">{displayName}</span>
-                        <span className="conv-time">
-                          {formatRelativeTime(conv.updatedAt)}
-                        </span>
+                        {!isDraftConv && conv.updatedAt && (
+                          <span className="conv-time">
+                            {formatRelativeTime(conv.updatedAt)}
+                          </span>
+                        )}
                       </div>
                       <div className="conv-last-msg">
-                        {conv.lastSender === 'admin' ? 'Bạn: ' : ''}
-                        {conv.lastMessage}
+                        {isDraftConv ? (
+                          <span style={{ fontStyle: 'italic', opacity: 0.65 }}>Chưa có tin nhắn</span>
+                        ) : (
+                          <>
+                            {conv.lastSender === 'admin' ? 'Bạn: ' : ''}
+                            {conv.lastMessage}
+                          </>
+                        )}
                       </div>
                     </div>
                     <div className="conv-actions-wrap" onClick={(e) => e.stopPropagation()}>
