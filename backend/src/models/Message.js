@@ -18,9 +18,26 @@ const messageSchema = new mongoose.Schema(
     },
     text: {
       type: String,
-      required: true,
+      default: '',
+    },
+    imageUrl: {
+      type: String,
+      default: '',
+    },
+    status: {
+      type: String,
+      enum: ['sent', 'delivered', 'read'],
+      default: 'sent',
     },
     isRead: {
+      type: Boolean,
+      default: false,
+    },
+    deletedByAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    deletedByUser: {
       type: Boolean,
       default: false,
     },

@@ -157,10 +157,32 @@ const getStats = async (req, res) => {
 // @desc    Get all users
 // @route   GET /api/admin/users
 // @access  Private/Admin
+const isMasterAdminUser = (u) => {
+  if (!u) return false;
+  return !!(
+    u.isMasterAdmin ||
+    u.username === 'admin' ||
+    u.email === 'admin@phuclong.vn' ||
+    u.email === 'admin@phuclong.com'
+  );
+};
+
+// @desc    Get all users
+// @route   GET /api/admin/users
+// @access  Private/Admin
 const getUsers = async (req, res) => {
   try {
     const users = await User.find().select('-password').sort({ createdAt: -1 });
-    res.json({ success: true, count: users.length, data: users });
+    const formattedUsers = users.map((u) => ({
+      _id: u._id,
+      username: u.username,
+      email: u.email,
+      phone: u.phone,
+      role: u.role,
+      isMasterAdmin: u.isMasterAdmin || isMasterAdminUser(u),
+      createdAt: u.createdAt,
+    }));
+    res.json({ success: true, count: formattedUsers.length, data: formattedUsers });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -168,15 +190,31 @@ const getUsers = async (req, res) => {
 
 // @desc    Update user details (role)
 // @route   PUT /api/admin/users/:id
-// @access  Private/Admin
+// @access  Private/Admin (Master Admin only for role changes)
 const updateUser = async (req, res) => {
   const { role } = req.body;
 
   try {
+    // Only Master Admin is allowed to grant (cấp) or revoke (thu hồi) admin privileges
+    if (!isMasterAdminUser(req.user)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Chỉ tài khoản Admin gốc (Master Admin) mới có quyền cấp hoặc thu hồi quyền quản trị viên.',
+      });
+    }
+
     const user = await User.findById(req.params.id);
 
     if (!user) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy thành viên.' });
+    }
+
+    // Cannot demote Master Admin account itself
+    if (isMasterAdminUser(user) && role === 'user') {
+      return res.status(400).json({
+        success: false,
+        message: 'Không thể thu hồi quyền Admin tối cao của hệ thống.',
+      });
     }
 
     if (user.role === 'admin' && role === 'user') {
@@ -184,7 +222,7 @@ const updateUser = async (req, res) => {
       if (adminCount <= 1) {
         return res
           .status(400)
-          .json({ success: false, message: 'Không thể hạ quyền Admin duy nhất của hệ thống.' });
+          .json({ success: false, message: 'Không thể hạ quyền Admin duy nhất còn lại của hệ thống.' });
       }
     }
 
@@ -196,7 +234,10 @@ const updateUser = async (req, res) => {
       data: {
         _id: updatedUser._id,
         username: updatedUser.username,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
         role: updatedUser.role,
+        isMasterAdmin: updatedUser.isMasterAdmin || isMasterAdminUser(updatedUser),
         createdAt: updatedUser.createdAt,
       },
     });
@@ -207,25 +248,31 @@ const updateUser = async (req, res) => {
 
 // @desc    Delete a user
 // @route   DELETE /api/admin/users/:id
-// @access  Private/Admin
+// @access  Private/Admin (Master Admin only)
 const deleteUser = async (req, res) => {
   try {
+    // Only Master Admin can delete users
+    if (!isMasterAdminUser(req.user)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Chỉ tài khoản Admin gốc (Master Admin) mới có quyền xóa thành viên.',
+      });
+    }
+
     const user = await User.findById(req.params.id);
 
     if (!user) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy thành viên.' });
     }
 
-    // Prevent deleting logged-in user, admin user, or any admin role
+    // Prevent deleting logged-in user or master admin
     if (
       user._id.toString() === req.user.id.toString() ||
-      user.username === req.user.username ||
-      user.role === 'admin' ||
-      user.username === 'admin'
+      isMasterAdminUser(user)
     ) {
       return res
         .status(400)
-        .json({ success: false, message: 'Không thể xóa tài khoản Admin hoặc tài khoản đang sử dụng.' });
+        .json({ success: false, message: 'Không thể xóa tài khoản Admin tối cao hoặc tài khoản đang sử dụng.' });
     }
 
     await user.deleteOne();

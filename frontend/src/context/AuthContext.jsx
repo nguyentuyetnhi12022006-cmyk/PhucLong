@@ -46,14 +46,15 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post('/auth/login', { username, password });
       if (response.data.success) {
-        const { token: userToken, role, username: uName, _id } = response.data.data;
+        const userData = response.data.data;
+        const userToken = userData.token;
         
         localStorage.setItem('userToken', userToken);
         localStorage.setItem('adminToken', userToken); // for api.js interceptor
         setToken(userToken);
-        setUser({ _id, username: uName, role });
+        setUser(userData);
         updateSocketToken(userToken);
-        return { success: true, role };
+        return { success: true, role: userData.role };
       }
       return { success: false };
     } catch (err) {

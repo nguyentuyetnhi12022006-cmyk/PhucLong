@@ -41,7 +41,7 @@ const getProductById = async (req, res) => {
 // @access  Private/Admin
 const createProduct = async (req, res) => {
   try {
-    const { name, description, price, category, image, sizes, toppings, isAvailable, isFeatured } = req.body;
+    const { name, description, price, category, image, sizes, toppings, isAvailable, isFeatured, isNewItem } = req.body;
 
     const product = await Product.create({
       name,
@@ -56,6 +56,7 @@ const createProduct = async (req, res) => {
       toppings: toppings || [],
       isAvailable: isAvailable !== undefined ? isAvailable : true,
       isFeatured: isFeatured !== undefined ? isFeatured : false,
+      isNewItem: isNewItem !== undefined ? isNewItem : true,
     });
 
     res.status(201).json({ success: true, data: product });

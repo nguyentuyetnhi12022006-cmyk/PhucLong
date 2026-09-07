@@ -44,6 +44,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isNewItem: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,

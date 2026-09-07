@@ -121,10 +121,8 @@ const Menu = () => {
     const fetchProducts = async () => {
       try {
         const response = await api.get('/products');
-        if (response.data.success && response.data.data.length > 0) {
+        if (response.data && response.data.success) {
           setProducts(response.data.data);
-        } else {
-          setProducts(FALLBACK_PRODUCTS);
         }
       } catch (error) {
         console.warn('Backend connection failed, loading fallback menu data.');

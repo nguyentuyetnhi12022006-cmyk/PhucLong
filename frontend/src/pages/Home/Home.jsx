@@ -102,10 +102,8 @@ const Home = () => {
       setLoading(true);
       try {
         const prodResponse = await api.get('/products');
-        if (prodResponse.data.success && prodResponse.data.data.length > 0) {
+        if (prodResponse.data && prodResponse.data.success) {
           setAllProducts(prodResponse.data.data);
-        } else {
-          setAllProducts(FALLBACK_FEATURED);
         }
       } catch (error) {
         console.warn('Backend connection failed, using fallback products.');
@@ -136,12 +134,21 @@ const Home = () => {
   // Filter products for the tabs section
   const getDisplayProducts = () => {
     if (activeProductTab === 'best-sellers') {
-      const best = allProducts.filter(p => p.isFeatured).slice(0, 4);
-      return best.length > 0 ? best : allProducts.slice(0, 4);
+      // Tab: Món Bán Chạy Nhất -> Món có nhãn Best Seller (isFeatured === true)
+      const best = allProducts.filter((p) => p.isFeatured === true);
+      return best.length > 0 ? best : allProducts.filter((p) => p.isFeatured);
     } else {
-      // Return a slice representing "new/recommended items" (e.g. coffee or bakery items)
-      const news = allProducts.filter(p => p.category === 'Trà trái cây' || p.category === 'Cà phê').slice(0, 4);
-      return news.length > 0 ? news : allProducts.slice(1, 5);
+      // Tab: Món Mới Khuyên Dùng -> Món có nhãn Mới (isNewItem/isNew)
+      const news = allProducts.filter(
+        (p) =>
+          p.isNewItem !== false &&
+          p.isNew !== false &&
+          (p.isNewItem === true ||
+            p.isNew === true ||
+            !p.createdAt ||
+            new Date().getTime() - new Date(p.createdAt || p.updatedAt).getTime() < 14 * 24 * 60 * 60 * 1000)
+      );
+      return news.length > 0 ? news : allProducts;
     }
   };
 
@@ -333,7 +340,6 @@ const Home = () => {
         <div className="container">
           <div className="section-header">
             <span className="section-subtitle">Gợi Ý Cho Bạn</span>
-            <h2 className="section-title">Danh mục đồ uống bán chạy</h2>
             <div className="section-divider"></div>
           </div>
 

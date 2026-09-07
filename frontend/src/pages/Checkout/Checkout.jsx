@@ -419,7 +419,7 @@ const Checkout = () => {
                   <div key={item.cartItemId} className="review-item">
                     <div className="review-item-main">
                       <span className="review-item-qty">{item.quantity}x</span>
-                      <span className="review-item-name">{item.name} (Size {item.size})</span>
+                      <span className="review-item-name">{item.name} {item.size && `(Size ${item.size})`}</span>
                       <span className="review-item-price">{formatPrice(item.price * item.quantity)}</span>
                     </div>
                     {item.toppings.length > 0 && (

@@ -23,10 +23,13 @@ import {
   PackageCheck,
   Calendar,
   Check,
+  Users,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { socket, joinUserRoom } from '../../services/socket';
 import api from '../../services/api';
+import OrderTracking from '../OrderTracking/OrderTracking';
+import MemberManager from '../Admin/MemberManager';
 import './UserProfile.css';
 
 const UserProfile = () => {
@@ -60,15 +63,35 @@ const UserProfile = () => {
   const [trackLoading, setTrackLoading] = useState(false);
   const [trackError, setTrackError] = useState('');
 
+  const checkIsMasterAdmin = (u) => {
+    if (!u) return false;
+    return !!(
+      u.isMasterAdmin ||
+      u.username === 'admin' ||
+      u.email === 'admin@phuclong.vn' ||
+      u.email === 'admin@phuclong.com'
+    );
+  };
+
+  const isMasterAdmin = checkIsMasterAdmin(user);
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login', { state: { from: '/profile' } });
       return;
     }
-    if (activeTab === 'orders') {
+    const isMaster = checkIsMasterAdmin(user);
+    if (user?.role === 'admin') {
+      if (!isMaster && activeTab !== 'info') {
+        setActiveTab('info');
+      } else if (isMaster && activeTab !== 'info' && activeTab !== 'other-accounts') {
+        setActiveTab('info');
+      }
+    }
+    if (activeTab === 'orders' && user?.role !== 'admin') {
       fetchMyOrders();
     }
-  }, [isAuthenticated, activeTab, navigate]);
+  }, [isAuthenticated, user, activeTab, navigate]);
 
   // Real-time Socket.io listener for customer order status changes
   useEffect(() => {
@@ -221,10 +244,36 @@ const UserProfile = () => {
               <span className="badge-role">{user?.role === 'admin' ? 'Quản Trị Viên' : 'Khách Hàng Thân Thiết'}</span>
             </div>
           </div>
-          <button onClick={logout} className="btn-profile-logout" title="Đăng xuất">
-            <LogOut size={18} />
-            <span>Đăng xuất</span>
-          </button>
+          <div className="profile-banner-actions" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            {user?.role === 'admin' && (
+              <button
+                onClick={() => navigate('/admin')}
+                className="btn-profile-admin"
+                style={{
+                  backgroundColor: '#0c513f',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '10px 18px',
+                  borderRadius: '24px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontSize: '0.9rem',
+                  boxShadow: '0 4px 12px rgba(12, 81, 63, 0.25)',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <Shield size={18} />
+                <span>Vào Trang Quản Trị</span>
+              </button>
+            )}
+            <button onClick={logout} className="btn-profile-logout" title="Đăng xuất">
+              <LogOut size={18} />
+              <span>Đăng xuất</span>
+            </button>
+          </div>
         </div>
 
         {/* Profile Tabs Navigation */}
@@ -236,24 +285,50 @@ const UserProfile = () => {
             <User size={18} />
             <span>Thông Tin & Bảo Mật</span>
           </button>
-          <button
-            className={`profile-tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('orders');
-              fetchMyOrders();
-            }}
-          >
-            <ShoppingBag size={18} />
-            <span>Đơn Hàng Của Tôi</span>
-            {orders.length > 0 && <span className="tab-badge">{orders.length}</span>}
-          </button>
-          <button
-            className={`profile-tab-btn ${activeTab === 'track' ? 'active' : ''}`}
-            onClick={() => setActiveTab('track')}
-          >
-            <Search size={18} />
-            <span>Tra Cứu Đơn Nhanh</span>
-          </button>
+
+          {/* Master Admin Tab: Tài Khoản Khác (Cấp & Thu Hồi Quyền Admin) */}
+          {user?.role === 'admin' && isMasterAdmin && (
+            <button
+              className={`profile-tab-btn ${activeTab === 'other-accounts' ? 'active' : ''}`}
+              onClick={() => setActiveTab('other-accounts')}
+            >
+              <Users size={18} />
+              <span>Tài Khoản Khác</span>
+            </button>
+          )}
+
+          {/* Customer Tabs */}
+          {user?.role !== 'admin' && (
+            <>
+              <button
+                className={`profile-tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveTab('orders');
+                  fetchMyOrders();
+                }}
+              >
+                <ShoppingBag size={18} />
+                <span>Đơn Hàng Của Tôi</span>
+                {orders.length > 0 && <span className="tab-badge">{orders.length}</span>}
+              </button>
+
+              <button
+                className={`profile-tab-btn ${activeTab === 'track' ? 'active' : ''}`}
+                onClick={() => setActiveTab('track')}
+              >
+                <Search size={18} />
+                <span>Tra Cứu Đơn Nhanh</span>
+              </button>
+
+              <button
+                className={`profile-tab-btn ${activeTab === 'tracking' ? 'active' : ''}`}
+                onClick={() => setActiveTab('tracking')}
+              >
+                <Truck size={18} />
+                <span>Theo Dõi Đơn Hàng</span>
+              </button>
+            </>
+          )}
         </div>
 
         {/* TAB 1: THÔNG TIN CÁ NHÂN & ĐỔI MẬT KHẨU */}
@@ -444,7 +519,7 @@ const UserProfile = () => {
                             <span>{statusInfo.text}</span>
                           </span>
                           <span className="order-total-price">{formatPrice(order.totalAmount)}</span>
-                          
+
                           {order.status === 'Pending' && (
                             <button
                               onClick={(e) => {
@@ -517,78 +592,23 @@ const UserProfile = () => {
           </div>
         )}
 
-        {/* TAB 3: TRA CỨU ĐƠN NHANH */}
-        {activeTab === 'track' && (
+        {/* TAB CHO MASTER ADMIN: TÀI KHOẢN KHÁC & PHÂN QUYỀN */}
+        {user?.role === 'admin' && isMasterAdmin && activeTab === 'other-accounts' && (
           <div className="profile-tab-content animate-fade-in">
-            <div className="profile-card">
-              <div className="profile-card-header">
-                <Search className="card-header-icon" size={20} />
-                <h3>Tra Cứu Đơn Hàng Bất Kỳ</h3>
+            <div className="profile-card" style={{ padding: '24px' }}>
+              <div className="profile-card-header" style={{ marginBottom: '20px' }}>
+                <Users className="card-header-icon" size={20} />
+                <h3>Quản Lý Tài Khoản Khác & Phân Quyền Quản Trị</h3>
               </div>
-              <div className="profile-card-body">
-                <form onSubmit={handleTrackSearch} className="track-search-form">
-                  <p className="track-hint">Nhập Mã đơn hàng hoặc Số điện thoại đặt hàng để kiểm tra tiến trình:</p>
-                  <div className="track-input-group">
-                    <input
-                      type="text"
-                      placeholder="Nhập mã đơn (vd: 64b...) hoặc SĐT đặt hàng..."
-                      value={trackQuery}
-                      onChange={(e) => setTrackQuery(e.target.value)}
-                      required
-                    />
-                    <button type="submit" className="btn-search-track" disabled={trackLoading}>
-                      <Search size={18} />
-                      <span>{trackLoading ? 'Đang tìm...' : 'Tra cứu'}</span>
-                    </button>
-                  </div>
-                </form>
-
-                {trackError && (
-                  <div className="profile-alert alert-error mt-4">
-                    <AlertCircle size={18} />
-                    <span>{trackError}</span>
-                  </div>
-                )}
-
-                {trackResult && (
-                  <div className="track-results-wrap mt-4 animate-fade-in">
-                    <h4>Kết quả tìm thấy ({trackResult.length} đơn hàng)</h4>
-                    {trackResult.map((ord) => {
-                      const st = getStatusDetails(ord.status);
-                      return (
-                        <div key={ord._id} className="track-order-result-card">
-                          <div className="result-header">
-                            <div>
-                              <span className="order-code">Mã đơn: #{ord._id.toUpperCase()}</span>
-                              <div className="order-date">{new Date(ord.createdAt).toLocaleString('vi-VN')}</div>
-                            </div>
-                            <span className={`status-pill ${st.class}`}>
-                              {st.icon} {st.text}
-                            </span>
-                          </div>
-                          <div className="result-body">
-                            <p><strong>Người nhận:</strong> {ord.customerName} ({ord.customerPhone})</p>
-                            <p><strong>Địa chỉ:</strong> {ord.shippingAddress}</p>
-                            <p><strong>Tổng tiền:</strong> <span className="highlight-price">{formatPrice(ord.totalAmount)}</span></p>
-                            {ord.status === 'Pending' && (
-                              <div className="mt-2 text-right">
-                                <button
-                                  onClick={() => handleCancelOrder(ord._id)}
-                                  disabled={cancellingId === ord._id}
-                                  className="btn-cancel-order"
-                                >
-                                  {cancellingId === ord._id ? 'Đang hủy...' : 'Hủy đơn hàng này'}
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+              <MemberManager />
             </div>
+          </div>
+        )}
+
+        {/* TAB 3 & 4: TRA CỨU & THEO DÕI ĐƠN HÀNG (Chỉ dành cho khách hàng) */}
+        {user?.role !== 'admin' && (activeTab === 'track' || activeTab === 'tracking') && (
+          <div className="profile-tab-content animate-fade-in">
+            <OrderTracking />
           </div>
         )}
       </div>

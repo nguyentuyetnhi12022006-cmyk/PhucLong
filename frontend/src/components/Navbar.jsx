@@ -19,6 +19,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { socket, joinAdminRoom, joinUserRoom } from '../services/socket';
 import api from '../services/api';
+import { formatRelativeTime } from '../utils/dateUtils';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -187,9 +188,52 @@ const Navbar = () => {
         });
       };
 
+      const handleUserNotification = (notif) => {
+        if (notif) {
+          setUserNotifs((prev) => [notif, ...prev]);
+          setUserUnreadCount((c) => c + 1);
+        } else {
+          api.get('/notifications').then((res) => {
+            if (res.data.success) {
+              setUserNotifs(res.data.notifications);
+              setUserUnreadCount(res.data.unreadCount);
+            }
+          });
+        }
+      };
+
+      const handleUserNotificationRead = () => {
+        api.get('/notifications').then((res) => {
+          if (res.data.success) {
+            setUserNotifs(res.data.notifications);
+            setUserUnreadCount(res.data.unreadCount);
+          }
+        });
+      };
+
+      const handleUserNotificationRefresh = () => {
+        api.get('/notifications').then((res) => {
+          if (res.data.success) {
+            setUserNotifs(res.data.notifications);
+            setUserUnreadCount(res.data.unreadCount);
+          }
+        });
+      };
+
       socket.on('order_status_updated', handleOrderStatusUpdated);
+      socket.on('user_notification', handleUserNotification);
+      socket.on('user_notification_read', handleUserNotificationRead);
+      socket.on('user_notification_refresh', handleUserNotificationRefresh);
+      socket.on('conversation_deleted', handleUserNotificationRefresh);
+      socket.on('message_deleted', handleUserNotificationRefresh);
+
       return () => {
         socket.off('order_status_updated', handleOrderStatusUpdated);
+        socket.off('user_notification', handleUserNotification);
+        socket.off('user_notification_read', handleUserNotificationRead);
+        socket.off('user_notification_refresh', handleUserNotificationRefresh);
+        socket.off('conversation_deleted', handleUserNotificationRefresh);
+        socket.off('message_deleted', handleUserNotificationRefresh);
       };
     }
   }, [isAdmin, isAuthenticated, user]);
@@ -309,19 +353,29 @@ const Navbar = () => {
                         <div
                           key={notif._id}
                           className={`notif-order-card ${!notif.isRead ? 'unread-card' : ''}`}
-                          onClick={() => {
+                          onClick={async () => {
                             setShowUserNotifDropdown(false);
-                            navigate('/profile', { state: { tab: 'orders' } });
+                            if (!notif.isRead) {
+                              try {
+                                await api.put(`/notifications/${notif._id}/read`);
+                                setUserUnreadCount((c) => Math.max(0, c - 1));
+                                setUserNotifs((prev) =>
+                                  prev.map((n) => (n._id === notif._id ? { ...n, isRead: true } : n))
+                                );
+                              } catch {}
+                            }
+                            if (notif.type === 'chat_message') {
+                              window.dispatchEvent(new CustomEvent('open_chat_widget'));
+                            } else {
+                              navigate('/profile', { state: { tab: 'orders' } });
+                            }
                           }}
                         >
                           <div className="notif-order-top">
                             <span className="notif-order-id">{notif.title}</span>
                             <span className="notif-order-time">
                               <Clock size={12} />
-                              {new Date(notif.createdAt).toLocaleTimeString('vi-VN', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
+                              {formatRelativeTime(notif.createdAt)}
                             </span>
                           </div>
                           <div className="notif-order-customer" style={{ fontSize: '0.85rem' }}>
@@ -396,10 +450,7 @@ const Navbar = () => {
                               </span>
                               <span className="notif-order-time">
                                 <Clock size={12} />
-                                {new Date(order.createdAt).toLocaleTimeString('vi-VN', {
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
+                                {formatRelativeTime(order.createdAt)}
                               </span>
                             </div>
 

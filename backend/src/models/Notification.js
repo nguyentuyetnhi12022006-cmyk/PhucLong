@@ -22,12 +22,17 @@ const notificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['order_created', 'order_approved', 'order_cancelled', 'order_status_updated', 'system'],
+      enum: ['order_created', 'order_approved', 'order_cancelled', 'order_status_updated', 'chat_message', 'system'],
       default: 'system',
     },
     orderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Order',
+      default: null,
+    },
+    messageId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Message',
       default: null,
     },
     isRead: {

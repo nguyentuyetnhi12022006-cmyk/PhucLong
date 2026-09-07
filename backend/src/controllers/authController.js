@@ -127,6 +127,12 @@ const loginUser = async (req, res) => {
     const user = await User.findOne(query);
 
     if (user && (await user.matchPassword(password))) {
+      const isMaster = !!(
+        user.isMasterAdmin ||
+        user.username === 'admin' ||
+        user.email === 'admin@phuclong.vn' ||
+        user.email === 'admin@phuclong.com'
+      );
       res.json({
         success: true,
         data: {
@@ -135,6 +141,7 @@ const loginUser = async (req, res) => {
           email: user.email,
           phone: user.phone,
           role: user.role,
+          isMasterAdmin: isMaster,
           token: generateToken(user._id),
         },
       });
@@ -155,6 +162,12 @@ const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (user) {
+      const isMaster = !!(
+        user.isMasterAdmin ||
+        user.username === 'admin' ||
+        user.email === 'admin@phuclong.vn' ||
+        user.email === 'admin@phuclong.com'
+      );
       res.json({
         success: true,
         data: {
@@ -163,6 +176,7 @@ const getMe = async (req, res) => {
           email: user.email,
           phone: user.phone,
           role: user.role,
+          isMasterAdmin: isMaster,
         },
       });
     } else {

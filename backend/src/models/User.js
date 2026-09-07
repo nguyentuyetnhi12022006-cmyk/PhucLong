@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema(
       enum: ['user', 'admin'],
       default: 'user',
     },
+    isMasterAdmin: {
+      type: Boolean,
+      default: false,
+    },
     resetPasswordOTP: {
       type: String,
     },

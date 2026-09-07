@@ -23,8 +23,17 @@ const ProductCustomizeModal = ({ product, onClose, onAddToCart }) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
   };
 
+  const availableSizes =
+    product.sizes && product.sizes.length > 0
+      ? product.sizes
+      : [
+          { size: 'S', priceAdjustment: 0 },
+          { size: 'M', priceAdjustment: 0 },
+          { size: 'L', priceAdjustment: 10000 },
+        ];
+
   // Get current size adjustment
-  const sizeObj = product.sizes?.find((s) => s.size === selectedSize) || { priceAdjustment: 0 };
+  const sizeObj = availableSizes.find((s) => s.size === selectedSize) || { priceAdjustment: 0 };
   const basePriceWithAdjustment = (product.price || 0) + sizeObj.priceAdjustment;
 
   // Calculate toppings price
@@ -105,40 +114,38 @@ const ProductCustomizeModal = ({ product, onClose, onAddToCart }) => {
               </div>
 
               <div className="modal-scroll-area">
-                {/* Size Selection */}
-                {product.sizes && product.sizes.length > 0 && (
-                  <div className="option-group">
-                    <h3 className="option-title">Chọn Kích Cỡ (Size)</h3>
-                    <div className="options-list-grid">
-                      {product.sizes.map((s) => (
-                        <label
-                          key={s.size}
-                          className={`option-item-card ${selectedSize === s.size ? 'selected' : ''}`}
-                        >
-                          <input
-                            type="radio"
-                            name="size"
-                            value={s.size}
-                            checked={selectedSize === s.size}
-                            onChange={() => setSelectedSize(s.size)}
-                            className="sr-only"
-                          />
-                          <div className="option-info">
-                            <span className="option-name">Size {s.size}</span>
-                            {s.priceAdjustment > 0 && (
-                              <span className="option-price-adj">
-                                +{formatPrice(s.priceAdjustment)}
-                              </span>
-                            )}
-                          </div>
-                        </label>
-                      ))}
-                    </div>
+                {/* Size Selection (Available for ALL products including Bakery) */}
+                <div className="option-group">
+                  <h3 className="option-title">Chọn Kích Cỡ (Size)</h3>
+                  <div className="options-list-grid">
+                    {availableSizes.map((s) => (
+                      <label
+                        key={s.size}
+                        className={`option-item-card ${selectedSize === s.size ? 'selected' : ''}`}
+                      >
+                        <input
+                          type="radio"
+                          name="size"
+                          value={s.size}
+                          checked={selectedSize === s.size}
+                          onChange={() => setSelectedSize(s.size)}
+                          className="sr-only"
+                        />
+                        <div className="option-info">
+                          <span className="option-name">Size {s.size}</span>
+                          {s.priceAdjustment > 0 && (
+                            <span className="option-price-adj">
+                              +{formatPrice(s.priceAdjustment)}
+                            </span>
+                          )}
+                        </div>
+                      </label>
+                    ))}
                   </div>
-                )}
+                </div>
 
                 {/* Sweetness Selection (Only for drinks) */}
-                {product.category !== 'Bánh ngọt' && (
+                {product.category !== 'Bánh ngọt' && product.category !== 'Bánh' && (
                   <div className="option-group">
                     <h3 className="option-title">Chọn Mức Đường</h3>
                     <div className="options-list-grid">
@@ -163,7 +170,7 @@ const ProductCustomizeModal = ({ product, onClose, onAddToCart }) => {
                 )}
 
                 {/* Ice Selection (Only for drinks) */}
-                {product.category !== 'Bánh ngọt' && (
+                {product.category !== 'Bánh ngọt' && product.category !== 'Bánh' && (
                   <div className="option-group">
                     <h3 className="option-title">Chọn Mức Đá</h3>
                     <div className="options-list-grid">
@@ -212,6 +219,7 @@ const ProductCustomizeModal = ({ product, onClose, onAddToCart }) => {
                     </div>
                   </div>
                 )}
+
               </div>
 
               {/* Footer: Quantity, Add to Cart & Buy Now Buttons */}

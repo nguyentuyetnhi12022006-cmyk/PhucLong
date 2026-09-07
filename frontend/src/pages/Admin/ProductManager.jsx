@@ -3,15 +3,29 @@ import { Plus, Edit2, Trash2, Check, X, AlertCircle } from 'lucide-react';
 import api from '../../services/api';
 import './ProductManager.css';
 
+const MASTER_SIZES = [
+  { size: 'S', label: 'Size S', defaultAdjustment: 0 },
+  { size: 'M', label: 'Size M', defaultAdjustment: 0 },
+  { size: 'L', label: 'Size L', defaultAdjustment: 7000 },
+];
+
 const DEFAULT_TOPPINGS = [
   { name: 'Trân châu hoàng kim', price: 10000 },
   { name: 'Trân châu đen', price: 8000 },
   { name: 'Thạch đào', price: 10000 },
   { name: 'Thạch nha đam', price: 8000 },
-  { name: 'Kem phô mai (Cheese Foam)', price: 12000 }
+  { name: 'Kem phô mai (Cheese Foam)', price: 12000 },
+  { name: 'Thạch cà phê', price: 8000 },
+  { name: 'Hạt chia', price: 6000 },
+  { name: 'Hạt sen thêm', price: 12000 },
+  { name: 'Trân châu đường đen', price: 10000 },
+  { name: 'Thêm kem tươi (Whipping Cream)', price: 10000 },
+  { name: 'Thêm sốt socola', price: 5000 },
+  { name: 'Bánh Oreo nghiền', price: 8000 }
 ];
 
 const DEFAULT_SIZES = [
+  { size: 'S', priceAdjustment: 0 },
   { size: 'M', priceAdjustment: 0 },
   { size: 'L', priceAdjustment: 7000 }
 ];
@@ -27,7 +41,8 @@ const FALLBACK_PRODUCTS = [
     sizes: DEFAULT_SIZES,
     toppings: DEFAULT_TOPPINGS.slice(0, 3),
     isAvailable: true,
-    isFeatured: true
+    isFeatured: true,
+    isNewItem: true,
   },
   {
     _id: 'fb-tc-1',
@@ -39,7 +54,8 @@ const FALLBACK_PRODUCTS = [
     sizes: DEFAULT_SIZES,
     toppings: DEFAULT_TOPPINGS.slice(2, 4),
     isAvailable: true,
-    isFeatured: true
+    isFeatured: true,
+    isNewItem: true,
   }
 ];
 
@@ -61,8 +77,14 @@ const ProductManager = () => {
   const [image, setImage] = useState('');
   const [isAvailable, setIsAvailable] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
+  const [isNewItem, setIsNewItem] = useState(true);
   const [toppings, setToppings] = useState([]);
-  
+  const [selectedSizes, setSelectedSizes] = useState([
+    { size: 'S', priceAdjustment: 0 },
+    { size: 'M', priceAdjustment: 0 },
+    { size: 'L', priceAdjustment: 7000 },
+  ]);
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -70,10 +92,8 @@ const ProductManager = () => {
     setLoading(true);
     try {
       const response = await api.get('/products');
-      if (response.data.success && response.data.data.length > 0) {
+      if (response.data && response.data.success) {
         setProducts(response.data.data);
-      } else {
-        setProducts(FALLBACK_PRODUCTS);
       }
     } catch (err) {
       console.warn('Backend connection failed, using fallback product database.');
@@ -101,7 +121,13 @@ const ProductManager = () => {
     setImage('');
     setIsAvailable(true);
     setIsFeatured(false);
-    setToppings(DEFAULT_TOPPINGS.slice(0, 3)); // Default subset of toppings
+    setIsNewItem(true);
+    setSelectedSizes([
+      { size: 'S', priceAdjustment: 0 },
+      { size: 'M', priceAdjustment: 0 },
+      { size: 'L', priceAdjustment: 7000 },
+    ]);
+    setToppings(DEFAULT_TOPPINGS.slice(0, 3));
     setError('');
     setIsModalOpen(true);
   };
@@ -116,20 +142,48 @@ const ProductManager = () => {
     setImage(product.image || '');
     setIsAvailable(product.isAvailable);
     setIsFeatured(product.isFeatured || false);
+    setIsNewItem(product.isNewItem !== undefined ? product.isNewItem : true);
+    if (product.sizes && product.sizes.length > 0) {
+      setSelectedSizes(product.sizes);
+    } else {
+      setSelectedSizes([
+        { size: 'S', priceAdjustment: 0 },
+        { size: 'M', priceAdjustment: 0 },
+        { size: 'L', priceAdjustment: 7000 },
+      ]);
+    }
     setToppings(product.toppings || []);
     setError('');
     setIsModalOpen(true);
   };
 
+  const handleSizeToggle = (sizeCode) => {
+    const exists = selectedSizes.some((s) => s.size === sizeCode);
+    if (exists) {
+      setSelectedSizes(selectedSizes.filter((s) => s.size !== sizeCode));
+    } else {
+      const defaultAdj = sizeCode === 'L' ? 7000 : 0;
+      setSelectedSizes([...selectedSizes, { size: sizeCode, priceAdjustment: defaultAdj }]);
+    }
+  };
+
+  const handleSizeAdjustmentChange = (sizeCode, adjustment) => {
+    const val = Number(adjustment) || 0;
+    setSelectedSizes(
+      selectedSizes.map((s) => (s.size === sizeCode ? { ...s, priceAdjustment: val } : s))
+    );
+  };
+
   // Toggle availability directly in list
   const handleToggleAvailability = async (product) => {
+    const targetId = product._id || product.id;
     const updatedStatus = !product.isAvailable;
     try {
-      await api.put(`/products/${product._id}`, { isAvailable: updatedStatus });
-      setProducts(prev => prev.map(p => p._id === product._id ? { ...p, isAvailable: updatedStatus } : p));
+      await api.put(`/products/${targetId}`, { isAvailable: updatedStatus });
+      setProducts(prev => prev.map(p => (p._id || p.id) === targetId ? { ...p, isAvailable: updatedStatus } : p));
     } catch (err) {
       console.warn('Backend offline, toggling availability locally.');
-      setProducts(prev => prev.map(p => p._id === product._id ? { ...p, isAvailable: updatedStatus } : p));
+      setProducts(prev => prev.map(p => (p._id || p.id) === targetId ? { ...p, isAvailable: updatedStatus } : p));
     }
   };
 
@@ -139,10 +193,14 @@ const ProductManager = () => {
     
     try {
       await api.delete(`/products/${productId}`);
-      setProducts(prev => prev.filter(p => p._id !== productId));
+      setProducts(prev => prev.filter(p => (p._id || p.id) !== productId));
     } catch (err) {
-      console.warn('Backend offline, deleting product locally.');
-      setProducts(prev => prev.filter(p => p._id !== productId));
+      if (err.response && err.response.data && err.response.data.message) {
+        alert(err.response.data.message);
+      } else {
+        console.warn('Backend offline, deleting product locally.');
+        setProducts(prev => prev.filter(p => (p._id || p.id) !== productId));
+      }
     }
   };
 
@@ -150,7 +208,7 @@ const ProductManager = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!name || !price || !category) {
+    if (!name || price === '' || price === null || !category) {
       setError('Vui lòng điền đầy đủ các thông tin bắt buộc.');
       return;
     }
@@ -166,43 +224,50 @@ const ProductManager = () => {
       image: image || 'https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=600&auto=format&fit=crop&q=80',
       isAvailable,
       isFeatured,
-      sizes: CATEGORIES.includes(category) && category !== 'Bánh ngọt' ? DEFAULT_SIZES : [],
-      toppings: category !== 'Bánh ngọt' ? toppings : []
+      isNewItem,
+      sizes: selectedSizes,
+      toppings: toppings
     };
 
     try {
       if (editingProduct) {
         // Edit Mode
-        const response = await api.put(`/products/${editingProduct._id}`, productData);
-        if (response.data.success) {
-          setProducts(prev => prev.map(p => p._id === editingProduct._id ? response.data.data : p));
+        const targetId = editingProduct._id || editingProduct.id;
+        const response = await api.put(`/products/${targetId}`, productData);
+        if (response.data && response.data.success) {
+          setProducts(prev => prev.map(p => (p._id || p.id) === targetId ? response.data.data : p));
           setIsModalOpen(false);
         }
       } else {
         // Add Mode
         const response = await api.post('/products', productData);
-        if (response.data.success) {
+        if (response.data && response.data.success) {
           setProducts(prev => [response.data.data, ...prev]);
           setIsModalOpen(false);
         }
       }
     } catch (err) {
-      console.warn('Backend offline, simulating product operation locally.');
-      // Mock local update
-      if (editingProduct) {
-        const mockUpdated = {
-          ...editingProduct,
-          ...productData
-        };
-        setProducts(prev => prev.map(p => p._id === editingProduct._id ? mockUpdated : p));
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message);
       } else {
-        const mockNew = {
-          _id: 'MOCK-PR-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
-          ...productData
-        };
-        setProducts(prev => [mockNew, ...prev]);
+        console.warn('Backend offline, simulating product operation locally.');
+        // Fallback local update / add
+        if (editingProduct) {
+          const targetId = editingProduct._id || editingProduct.id;
+          const mockUpdated = {
+            ...editingProduct,
+            ...productData
+          };
+          setProducts(prev => prev.map(p => (p._id || p.id) === targetId ? mockUpdated : p));
+        } else {
+          const mockNew = {
+            _id: 'MOCK-PR-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+            ...productData
+          };
+          setProducts(prev => [mockNew, ...prev]);
+        }
+        setIsModalOpen(false);
       }
-      setIsModalOpen(false);
     } finally {
       setSubmitting(false);
     }
@@ -220,6 +285,20 @@ const ProductManager = () => {
   const formatPrice = (value) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
   };
+
+  // Dynamic merge of DEFAULT_TOPPINGS and any toppings present on loaded products
+  const masterToppingsMap = new Map();
+  DEFAULT_TOPPINGS.forEach((t) => masterToppingsMap.set(t.name, t));
+  products.forEach((p) => {
+    if (Array.isArray(p.toppings)) {
+      p.toppings.forEach((t) => {
+        if (t && t.name && !masterToppingsMap.has(t.name)) {
+          masterToppingsMap.set(t.name, t);
+        }
+      });
+    }
+  });
+  const allSelectableToppings = Array.from(masterToppingsMap.values());
 
   return (
     <div className="product-manager-component animate-fade-in">
@@ -406,33 +485,89 @@ const ProductManager = () => {
                       onChange={(e) => setIsFeatured(e.target.checked)}
                       className="custom-checkbox"
                     />
-                    <span>Sản phẩm nổi bật (Trang chủ)</span>
+                    <span>Sản phẩm nổi bật (★ Best Seller)</span>
+                  </label>
+
+                  <label className="checkbox-label-card">
+                    <input 
+                      type="checkbox" 
+                      checked={isNewItem}
+                      onChange={(e) => setIsNewItem(e.target.checked)}
+                      className="custom-checkbox"
+                    />
+                    <span>Sản phẩm mới (✨ Mới)</span>
                   </label>
                 </div>
 
-                {/* Toppings (Only if not pastry) */}
-                {category !== 'Bánh ngọt' && (
-                  <div className="toppings-selection-group">
-                    <label className="form-group-label">Chọn Toppings Hỗ Trợ</label>
-                    <div className="toppings-check-grid">
-                      {DEFAULT_TOPPINGS.map((topping) => {
-                        const isChecked = toppings.some(t => t.name === topping.name);
-                        return (
-                          <label key={topping.name} className={`topping-checkbox-card ${isChecked ? 'active' : ''}`}>
-                            <input 
+                {/* Sizes Selection Group */}
+                <div className="sizes-selection-group">
+                  <label className="form-group-label">Cấu Hình Kích Cỡ (Sizes)</label>
+                  <div className="sizes-check-grid">
+                    {MASTER_SIZES.map((master) => {
+                      const activeObj = selectedSizes.find((s) => s.size === master.size);
+                      const isChecked = !!activeObj;
+                      return (
+                        <div
+                          key={master.size}
+                          className={`size-checkbox-card ${isChecked ? 'active' : ''}`}
+                        >
+                          <div
+                            className="size-card-header"
+                            onClick={() => handleSizeToggle(master.size)}
+                          >
+                            <input
                               type="checkbox"
                               checked={isChecked}
-                              onChange={() => handleToppingToggle(topping)}
-                              className="sr-only"
+                              onChange={() => handleSizeToggle(master.size)}
+                              className="custom-checkbox"
                             />
-                            <span className="topping-chk-name">{topping.name}</span>
-                            <span className="topping-chk-price">+{formatPrice(topping.price)}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
+                            <span className="size-chk-name">{master.label}</span>
+                          </div>
+                          {isChecked && (
+                            <div className="size-price-input-row">
+                              <label>Cộng thêm:</label>
+                              <input
+                                type="number"
+                                value={activeObj.priceAdjustment}
+                                onChange={(e) =>
+                                  handleSizeAdjustmentChange(master.size, e.target.value)
+                                }
+                                placeholder="0"
+                                className="size-adj-input"
+                              />
+                              <span style={{ fontSize: '0.78rem', color: '#666' }}>VND</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                )}
+                </div>
+
+                {/* Toppings Selection Group */}
+                <div className="toppings-selection-group" style={{ marginTop: '20px' }}>
+                  <label className="form-group-label">Chọn Toppings Hỗ Trợ</label>
+                  <div className="toppings-check-grid">
+                    {allSelectableToppings.map((topping) => {
+                      const isChecked = toppings.some((t) => t.name === topping.name);
+                      return (
+                        <label
+                          key={topping.name}
+                          className={`topping-checkbox-card ${isChecked ? 'active' : ''}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => handleToppingToggle(topping)}
+                            className="sr-only"
+                          />
+                          <span className="topping-chk-name">{topping.name}</span>
+                          <span className="topping-chk-price">+{formatPrice(topping.price)}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
 
               <div className="detail-modal-footer">

@@ -201,12 +201,14 @@ const OrderTracking = () => {
         {/* Page Header */}
         <div className="tracking-header">
           <div className="tracking-badge-icon">
-            <PackageCheck size={32} />
+            <PackageCheck size={28} />
           </div>
-          <h1 className="tracking-title">Tra Cứu & Theo Dõi Đơn Hàng</h1>
-          <p className="tracking-subtitle">
-            Nhập Mã đơn hàng hoặc Số điện thoại để kiểm tra xem đơn hàng đã được giao hay chưa!
-          </p>
+          <div className="tracking-header-text">
+            <h1 className="tracking-title">Tra Cứu & Theo Dõi Đơn Hàng</h1>
+            <p className="tracking-subtitle">
+              Nhập Mã đơn hàng hoặc Số điện thoại để kiểm tra xem đơn hàng đã được giao hay chưa!
+            </p>
+          </div>
         </div>
 
         {/* Search Box */}

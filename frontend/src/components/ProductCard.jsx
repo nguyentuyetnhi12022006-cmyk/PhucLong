@@ -1,14 +1,26 @@
 import React from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Star, Sparkles } from 'lucide-react';
 import './ProductCard.css';
 
 const ProductCard = ({ product, onSelect }) => {
-  const { name, description, price, category, image, isAvailable } = product;
+  const { name, description, price, category, image, isAvailable, isFeatured, isNewItem, isNew, createdAt, updatedAt } = product;
 
   // Format price to VND
   const formatPrice = (value) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
   };
+
+  // Determine if product is "Best Seller" (Featured)
+  const isBestSeller = isFeatured === true;
+
+  // Determine if product is "Mới" (Newly added or updated)
+  const isNewBadge =
+    isNewItem !== false &&
+    isNew !== false &&
+    (isNewItem === true ||
+      isNew === true ||
+      !createdAt ||
+      new Date().getTime() - new Date(createdAt || updatedAt).getTime() < 14 * 24 * 60 * 60 * 1000);
 
   return (
     <div className={`product-card ${!isAvailable ? 'sold-out' : ''}`}>
@@ -20,6 +32,21 @@ const ProductCard = ({ product, onSelect }) => {
           loading="lazy"
         />
         <span className="product-category-tag">{category}</span>
+
+        {/* Badges Top Right (Best Seller & Mới) */}
+        <div className="product-badges-top-right">
+          {isBestSeller && (
+            <span className="product-badge badge-best-seller">
+              <Star size={11} fill="currentColor" /> Best Seller
+            </span>
+          )}
+          {isNewBadge && (
+            <span className="product-badge badge-new">
+              <Sparkles size={11} /> Mới
+            </span>
+          )}
+        </div>
+
         {!isAvailable && <div className="sold-out-overlay">Hết Hàng</div>}
       </div>
 

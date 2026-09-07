@@ -58,7 +58,7 @@ const Cart = () => {
           </div>
 
           <div className="cart-item-details">
-            <span className="cart-item-size-badge">Size {item.size}</span>
+            {item.size && <span className="cart-item-size-badge">Size {item.size}</span>}
             {item.toppings && item.toppings.length > 0 && (
               <div className="cart-item-toppings">
                 <b>Toppings:</b> {item.toppings.join(', ')}

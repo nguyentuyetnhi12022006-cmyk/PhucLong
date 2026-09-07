@@ -198,6 +198,7 @@ const seedDB = async () => {
       username: 'admin',
       password: 'admin123',
       role: 'admin',
+      isMasterAdmin: true,
     });
     await adminUser.save();
     console.log('Admin user created (admin / admin123)');
