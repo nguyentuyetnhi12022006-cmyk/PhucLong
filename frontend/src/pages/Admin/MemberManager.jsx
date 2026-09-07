@@ -365,45 +365,75 @@ const MemberManager = ({ onContactUser }) => {
                       <td className="text-center actions-cell">
                         {isMe ? (
                           <span className="text-muted text-xs font-semibold">Đang sử dụng</span>
+                        ) : !isCurrentMasterAdmin ? (
+                          /* Giao diện dành cho Admin được cấp quyền: Tất cả nút/nhãn đều căn GIỮA 100% thẳng hàng với cột Hành động */
+                          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                            {!targetIsAdmin && onContactUser ? (
+                              <button
+                                onClick={() => onContactUser(u)}
+                                className="btn-action-member contact"
+                                title="Nhắn tin liên hệ với khách hàng này"
+                                style={{
+                                  backgroundColor: '#0c513f',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  padding: '6px 16px',
+                                  borderRadius: '20px',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  fontSize: '0.8rem',
+                                  fontWeight: '600',
+                                  boxShadow: '0 2px 4px rgba(12, 81, 63, 0.12)',
+                                  transition: 'all 0.2s ease',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                <MessageCircle size={14} /> Liên hệ
+                              </button>
+                            ) : (
+                              <span className="text-muted text-xs font-semibold" style={{ color: '#0c513f' }}>
+                                Quản trị viên
+                              </span>
+                            )}
+                          </div>
                         ) : (
-                          <div style={{ display: 'inline-grid', gridTemplateColumns: '100px 105px 40px', gap: '8px', alignItems: 'center', justifyContent: 'center' }}>
-                            {/* Cột 1: Nút Nhắn tin liên hệ với khách hàng */}
-                            <div style={{ display: 'flex', justifyContent: 'center' }}>
-                              {!targetIsAdmin && onContactUser && (
-                                <button
-                                  onClick={() => onContactUser(u)}
-                                  className="btn-action-member contact"
-                                  title="Nhắn tin liên hệ với khách hàng này"
-                                  style={{
-                                    backgroundColor: '#0c513f',
-                                    color: '#ffffff',
-                                    border: 'none',
-                                    padding: '6px 12px',
-                                    borderRadius: '20px',
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                    fontSize: '0.8rem',
-                                    fontWeight: '600',
-                                    boxShadow: '0 2px 4px rgba(12, 81, 63, 0.12)',
-                                    transition: 'all 0.2s ease',
-                                    whiteSpace: 'nowrap',
-                                  }}
-                                >
-                                  <MessageCircle size={14} /> Liên hệ
-                                </button>
-                              )}
-                            </div>
+                          /* Giao diện dành cho Admin gốc (Master Admin): Các nút căn giữa thành khối hàng ngang gọn gàng */
+                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                            {!targetIsAdmin && onContactUser && (
+                              <button
+                                onClick={() => onContactUser(u)}
+                                className="btn-action-member contact"
+                                title="Nhắn tin liên hệ với khách hàng này"
+                                style={{
+                                  backgroundColor: '#0c513f',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  padding: '6px 14px',
+                                  borderRadius: '20px',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  fontSize: '0.8rem',
+                                  fontWeight: '600',
+                                  boxShadow: '0 2px 4px rgba(12, 81, 63, 0.12)',
+                                  transition: 'all 0.2s ease',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                <MessageCircle size={14} /> Liên hệ
+                              </button>
+                            )}
 
-                            {/* Cột 2: Nút Promote / Demote dành cho Admin gốc */}
-                            <div style={{ display: 'flex', justifyContent: 'center' }}>
-                              {isCurrentMasterAdmin ? (
-                                targetIsMaster ? (
-                                  <span className="text-muted text-xs font-semibold" style={{ color: '#0c513f', whiteSpace: 'nowrap' }}>
-                                    Tài khoản gốc
-                                  </span>
-                                ) : !targetIsAdmin ? (
+                            {targetIsMaster ? (
+                              <span className="text-muted text-xs font-semibold" style={{ color: '#0c513f', whiteSpace: 'nowrap' }}>
+                                Tài khoản gốc
+                              </span>
+                            ) : (
+                              <>
+                                {!targetIsAdmin ? (
                                   <button
                                     onClick={() => handleRoleChange(u, 'admin')}
                                     className="btn-action-member promote"
@@ -447,17 +477,8 @@ const MemberManager = ({ onContactUser }) => {
                                   >
                                     <ArrowDown size={14} /> Demote
                                   </button>
-                                )
-                              ) : (
-                                targetIsAdmin && (
-                                  <span className="text-muted text-xs font-semibold" style={{ whiteSpace: 'nowrap' }}>Quản trị viên</span>
-                                )
-                              )}
-                            </div>
+                                )}
 
-                            {/* Cột 3: Nút Thùng Rác (Xóa) - Luôn nằm ở Cột 3 thẳng hàng 100% */}
-                            <div style={{ display: 'flex', justifyContent: 'center' }}>
-                              {isCurrentMasterAdmin && !targetIsMaster && (
                                 <button
                                   onClick={() => handleDeleteUser(u)}
                                   className="btn-action delete-member"
@@ -479,8 +500,8 @@ const MemberManager = ({ onContactUser }) => {
                                 >
                                   <Trash2 size={16} />
                                 </button>
-                              )}
-                            </div>
+                              </>
+                            )}
                           </div>
                         )}
                       </td>
