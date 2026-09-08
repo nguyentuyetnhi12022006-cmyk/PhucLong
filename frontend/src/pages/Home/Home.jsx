@@ -91,6 +91,7 @@ const FALLBACK_COUPONS = [
 
 const Home = () => {
   const [allProducts, setAllProducts] = useState([]);
+  const [topSellingProducts, setTopSellingProducts] = useState([]);
   const [coupons, setCoupons] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -108,6 +109,15 @@ const Home = () => {
       } catch (error) {
         console.warn('Backend connection failed, using fallback products.');
         setAllProducts(FALLBACK_FEATURED);
+      }
+
+      try {
+        const topResponse = await api.get('/products/top-selling');
+        if (topResponse.data && topResponse.data.success && topResponse.data.data.length > 0) {
+          setTopSellingProducts(topResponse.data.data);
+        }
+      } catch (error) {
+        console.warn('Failed to fetch top selling products from API.');
       }
 
       try {
@@ -152,8 +162,11 @@ const Home = () => {
     }
   };
 
-  // Filter products for the top 5 ranking section
+  // Filter products for the top 5 ranking section (synced with admin statistics / order management)
   const getTop5Products = () => {
+    if (topSellingProducts.length > 0) {
+      return topSellingProducts.slice(0, 5);
+    }
     if (allProducts.length >= 5) {
       return allProducts.slice(0, 5);
     }

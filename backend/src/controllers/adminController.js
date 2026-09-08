@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Coupon = require('../models/Coupon');
+const { calculateTopSellingProducts } = require('./productController');
 
 // @desc    Get dashboard overview statistics
 // @route   GET /api/admin/stats
@@ -52,53 +53,16 @@ const getStats = async (req, res) => {
       a.date.localeCompare(b.date)
     );
 
-    // 3. Compute top selling products
-    const productSalesMap = {};
+    // 3. Compute top selling products (synchronized with homepage API)
+    const topProducts = await calculateTopSellingProducts();
+
+    // 4. Compute category sales distribution
     const products = await Product.find();
     const productCategoryMap = {};
     products.forEach((p) => {
       productCategoryMap[p.name] = p.category;
     });
 
-    completedOrders.forEach((order) => {
-      order.items.forEach((item) => {
-        const key = item.name;
-        if (!productSalesMap[key]) {
-          productSalesMap[key] = {
-            name: item.name,
-            quantity: 0,
-            revenue: 0,
-            category: productCategoryMap[item.name] || 'Trà sữa',
-          };
-        }
-        productSalesMap[key].quantity += item.quantity;
-        productSalesMap[key].revenue += item.price * item.quantity;
-      });
-    });
-
-    let topProducts = Object.values(productSalesMap).sort(
-      (a, b) => b.quantity - a.quantity
-    );
-
-    if (topProducts.length < 5 && products.length > 0) {
-      const existingNames = new Set(topProducts.map((p) => p.name));
-      for (const p of products) {
-        if (topProducts.length >= 5) break;
-        if (!existingNames.has(p.name)) {
-          topProducts.push({
-            name: p.name,
-            quantity: 0,
-            revenue: 0,
-            category: p.category || 'Trà sữa',
-          });
-          existingNames.add(p.name);
-        }
-      }
-    }
-
-    topProducts = topProducts.slice(0, 5);
-
-    // 4. Compute category sales distribution
     const categorySalesMap = {
       'Trà sữa': 0,
       'Trà trái cây': 0,

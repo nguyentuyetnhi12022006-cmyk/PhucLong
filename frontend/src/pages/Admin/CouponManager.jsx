@@ -276,9 +276,9 @@ const CouponManager = () => {
       {isModalOpen && (
         <div className="modal-backdrop">
           <div className="modal-content coupon-modal-content animate-slide-up">
-            <div className="modal-header">
+            <div className="coupon-modal-header">
               <h3>{editingCoupon ? 'Cập Nhật Mã Giảm Giá' : 'Thêm Mã Giảm Giá Mới'}</h3>
-              <button onClick={() => setIsModalOpen(false)} className="btn-close-modal">
+              <button onClick={() => setIsModalOpen(false)} className="btn-close-modal" aria-label="Đóng">
                 <X size={20} />
               </button>
             </div>

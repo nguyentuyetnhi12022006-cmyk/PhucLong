@@ -144,30 +144,42 @@
   overflow: hidden;
 }
 
-.modal-header {
+.coupon-modal-header {
   padding: 20px 24px;
   border-bottom: 1px solid #f1f3f5;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.modal-header h3 {
-  font-size: 1.2rem;
+.coupon-modal-header h3 {
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--color-primary-dark);
   margin: 0;
+  text-align: left !important;
+  flex: 1;
 }
 
-.btn-close-modal {
+.coupon-modal-header .btn-close-modal {
   background: none;
   border: none;
   color: var(--color-text-light);
   cursor: pointer;
-  transition: color 0.2s;
+  padding: 6px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  margin-left: auto;
 }
 
-.btn-close-modal:hover {
+.coupon-modal-header .btn-close-modal:hover {
+  background-color: #f1f3f5;
   color: var(--color-danger);
 }
 
