@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, Outlet, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
@@ -14,7 +14,6 @@ import UserProfile from './pages/Profile/UserProfile';
 import PrivacyPolicy from './pages/PrivacyPolicy/PrivacyPolicy';
 import AdminLogin from './pages/Admin/AdminLogin';
 import AdminLayout from './pages/Admin/AdminLayout';
-import OrderTracking from './pages/OrderTracking/OrderTracking';
 import './styles/global.css';
 
 // Whenever the user logs out, always send them back to the home page.
@@ -65,7 +64,8 @@ function App() {
               <Route path="login" element={<LoginRegister />} />
               <Route path="profile" element={<UserProfile />} />
               <Route path="my-orders" element={<UserProfile />} />
-              <Route path="tracking" element={<OrderTracking />} />
+              {/* Order tracking now lives inside the Profile's "Tra Cứu Đơn Hàng" tab */}
+              <Route path="tracking" element={<Navigate to="/profile?tab=track" replace />} />
               <Route path="privacy" element={<PrivacyPolicy />} />
               <Route path="terms" element={<PrivacyPolicy />} />
             </Route>

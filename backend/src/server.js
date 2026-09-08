@@ -101,7 +101,10 @@ app.use((err, req, res, next) => {
 
 // Start the HTTP server locally. Vercel imports the Express app as a function.
 if (require.main === module) {
-  const PORT = process.env.PORT || 5000;
+  // PORT=0 (đôi khi do môi trường shell set) nghĩa là "chọn port ngẫu nhiên" —
+  // nhưng frontend dev đang trỏ cố định về 5000, nên coi 0 là dùng mặc định 5000.
+  const rawPort = Number(process.env.PORT);
+  const PORT = rawPort > 0 ? rawPort : 5000;
   server.listen(PORT, () => {
     console.log(`Real-time Server running on port ${PORT}`);
   });

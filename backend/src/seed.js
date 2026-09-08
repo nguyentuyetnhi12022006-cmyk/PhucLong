@@ -223,7 +223,16 @@ const seedDB = async () => {
     console.log(`Seeded ${seededCustomerUsers.length} customer users!`);
 
     // 3. Products
-    const seededProducts = await Product.insertMany(products);
+    // Tạo createdAt/updatedAt so le để demo mục "Món Mới": món vừa thêm/cập nhật
+    // sẽ hiện badge "MỚI · X giờ/ngày trước" ở trang chủ (trong 14 ngày gần nhất).
+    const productNow = Date.now();
+    const productHourMs = 60 * 60 * 1000;
+    const recencyOffsetsHours = [2, 26, 50, 74, 96, 150, 320, 440, 520];
+    const productsWithTime = products.map((p, i) => {
+      const t = new Date(productNow - recencyOffsetsHours[i % recencyOffsetsHours.length] * productHourMs);
+      return { ...p, createdAt: t, updatedAt: t };
+    });
+    const seededProducts = await Product.insertMany(productsWithTime);
     console.log(`Seeded ${seededProducts.length} products!`);
 
     // 4. Coupons

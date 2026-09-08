@@ -101,9 +101,7 @@ const AdminLogin = () => {
           </button>
         </form>
 
-        <div className="login-footer">
-          <p>Mặc định thử nghiệm: <b>admin</b> / <b>admin123</b></p>
-        </div>
+
       </div>
     </div>
   );

@@ -367,16 +367,97 @@
   .admin-filter-bar {
     flex-direction: column;
     align-items: stretch;
+    padding: 12px;
+    gap: 10px;
+  }
+  
+  .status-filter-buttons {
+    flex: none;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  
+  .status-filter-buttons::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .filter-btn {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  .btn-refresh-orders {
+    width: 100%;
+    justify-content: center;
+    padding: 8px 12px;
+  }
+  
+  .admin-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+  }
+  
+  .admin-table {
+    min-width: 600px;
+    font-size: 0.8rem;
+  }
+  
+  .admin-table thead th {
+    font-size: 0.7rem;
+    padding: 8px 6px;
+    white-space: nowrap;
+  }
+  
+  .admin-table tbody td {
+    padding: 8px 6px;
+    font-size: 0.78rem;
+  }
+  
+  .font-monospace {
+    font-size: 0.68rem;
+    word-break: break-all;
   }
   
   .table-actions {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    flex-wrap: wrap;
     gap: 6px;
+  }
+  
+  .status-select-dropdown {
+    font-size: 0.72rem;
+    padding: 4px 6px;
+  }
+  
+  .detail-modal {
+    width: 95% !important;
+    max-height: 90vh !important;
+    margin: 5vh auto !important;
+  }
+  
+  .detail-modal-header {
+    padding: 14px 16px;
+  }
+  
+  .detail-modal-header h3 {
+    font-size: 1rem;
+  }
+  
+  .detail-modal-body {
+    padding: 14px;
   }
   
   .detail-info-grid {
     grid-template-columns: 1fr;
+    padding: 12px;
   }
   
   .info-row.full-width {
@@ -386,11 +467,27 @@
   .detail-item-table-header,
   .detail-item-table-row {
     grid-template-columns: 1.5fr 0.8fr 1fr;
+    font-size: 0.75rem;
   }
   
-  /* Hide unit price on mobile detail table */
   .detail-item-table-header span:nth-child(3),
   .detail-item-table-row span:nth-child(3) {
     display: none;
+  }
+  
+  .detail-modal-footer {
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+  
+  .update-status-quick-action {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  
+  .admin-empty-state {
+    padding: 30px 16px;
   }
 }

@@ -276,3 +276,18 @@
     gap: 20px;
   }
 }
+
+@media (max-width: 600px) {
+  .menu-hero-section {
+    padding: 60px 0 40px 0;
+  }
+
+  .menu-hero-title {
+    font-size: 2.2rem;
+  }
+
+  .menu-hero-image {
+    max-width: 260px;
+    height: 200px;
+  }
+}

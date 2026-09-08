@@ -70,7 +70,7 @@ const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = fa
       }
     }
 
-    navigate(`/tracking?id=${orderId}`);
+    navigate(`/profile?tab=track&id=${orderId}`);
   };
 
   const isExpired = timeLeft <= 0;

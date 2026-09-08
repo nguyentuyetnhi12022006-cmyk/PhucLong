@@ -262,7 +262,7 @@ const Checkout = () => {
             )}
 
             <div className="success-actions">
-              <Link to={`/tracking?id=${createdOrder._id}`} className="btn btn-primary btn-track-order-success">
+              <Link to={`/profile?tab=track&id=${createdOrder._id}`} className="btn btn-primary btn-track-order-success">
                 <Search size={18} /> Theo Dõi Trạng Thái Đơn Hàng
               </Link>
               <Link to="/menu" className="btn btn-outline">Tiếp Tục Mua Sắm</Link>

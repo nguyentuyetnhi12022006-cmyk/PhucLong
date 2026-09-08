@@ -175,6 +175,17 @@
   text-overflow: ellipsis;
 }
 
+.conv-last-msg.no-chat-yet {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.conv-phone {
+  font-weight: 500;
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+}
+
 .conv-unread-pill {
   background: #e53935;
   color: #ffffff;

@@ -6,6 +6,9 @@ import ProductCustomizeModal from '../../components/ProductCustomizeModal';
 import { useCart } from '../../context/CartContext';
 import './Menu.css';
 
+// Giúp demo offline: vài sản phẩm fallback có thời gian tạo gần đây (hiện badge MỚI)
+const menuHoursAgo = (h) => new Date(Date.now() - h * 60 * 60 * 1000).toISOString();
+
 // Fallback menu data in case the database is not seeded/running
 const FALLBACK_PRODUCTS = [
   {
@@ -22,7 +25,9 @@ const FALLBACK_PRODUCTS = [
       { name: 'Kem phô mai (Cheese Foam)', price: 12000 }
     ],
     isAvailable: true,
-    isFeatured: true
+    isFeatured: true,
+    createdAt: menuHoursAgo(2),
+    updatedAt: menuHoursAgo(2)
   },
   {
     _id: 'fb-ts-2',
@@ -45,7 +50,9 @@ const FALLBACK_PRODUCTS = [
     sizes: [{ size: 'M', priceAdjustment: 0 }, { size: 'L', priceAdjustment: 8000 }],
     toppings: [{ name: 'Thạch đào', price: 10000 }, { name: 'Thạch nha đam', price: 8000 }],
     isAvailable: true,
-    isFeatured: true
+    isFeatured: true,
+    createdAt: menuHoursAgo(26),
+    updatedAt: menuHoursAgo(26)
   },
   {
     _id: 'fb-tc-2',
@@ -80,7 +87,9 @@ const FALLBACK_PRODUCTS = [
     sizes: [{ size: 'M', priceAdjustment: 0 }, { size: 'L', priceAdjustment: 9000 }],
     toppings: [{ name: 'Trân châu đường đen', price: 10000 }],
     isAvailable: true,
-    isFeatured: true
+    isFeatured: true,
+    createdAt: menuHoursAgo(150),
+    updatedAt: menuHoursAgo(150)
   },
   {
     _id: 'fb-bn-1',

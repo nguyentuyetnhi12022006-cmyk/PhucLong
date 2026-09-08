@@ -355,6 +355,99 @@
   .mobile-menu-toggle {
     display: block;
   }
+
+  .navbar-container {
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  .navbar-logo {
+    gap: 8px;
+  }
+
+  .logo-icon-circle {
+    width: 32px;
+    height: 32px;
+  }
+
+  .logo-icon-circle svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .logo-text-primary {
+    font-size: 1.1rem;
+  }
+
+  .logo-text-secondary {
+    font-size: 0.5rem;
+    letter-spacing: 1.5px;
+  }
+
+  .navbar-actions {
+    gap: 8px;
+  }
+
+  .btn-login-header {
+    padding: 8px 14px;
+    font-size: 0.8rem;
+  }
+
+  .btn-login-header span {
+    display: none;
+  }
+
+  .btn-login-header svg {
+    margin: 0;
+  }
+
+  .btn-quick-dashboard {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    gap: 4px;
+  }
+
+  .btn-quick-dashboard span {
+    display: none;
+  }
+
+  .admin-actions-group {
+    gap: 6px;
+  }
+
+  .user-logged-info {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+
+  .user-info-name {
+    max-width: 80px;
+  }
+
+  .btn-logout-header {
+    width: 32px;
+    height: 32px;
+  }
+
+  .btn-notif-bell {
+    width: 36px;
+    height: 36px;
+  }
+
+  .admin-notif-dropdown {
+    position: fixed;
+    top: var(--header-height);
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-width: 100%;
+    border-radius: 0 0 16px 16px;
+    max-height: 60vh;
+  }
+
+  .admin-notif-dropdown .notif-dropdown-body {
+    max-height: 40vh;
+  }
 }
 
 /* ==========================================================================
@@ -686,8 +779,18 @@
 
 @media (max-width: 480px) {
   .admin-notif-dropdown {
-    width: 300px;
-    right: -40px;
+    position: fixed;
+    top: var(--header-height);
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-width: 100%;
+    border-radius: 0 0 16px 16px;
+    max-height: 50vh;
+  }
+
+  .admin-notif-dropdown .notif-dropdown-body {
+    max-height: 30vh;
   }
 }
 

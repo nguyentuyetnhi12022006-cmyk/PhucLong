@@ -531,6 +531,32 @@
   font-size: 1rem;
 }
 
+/* Embedded inside the Profile "Tra Cứu Đơn Nhanh" tab */
+.order-tracking-page.embedded {
+  padding: 0;
+  min-height: auto;
+  background: transparent;
+}
+
+.tracking-container.embedded {
+  max-width: 100%;
+}
+
+.tracking-container.embedded .tracking-header {
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tracking-container.embedded .tracking-badge-icon {
+  flex-shrink: 0;
+}
+
+.tracking-container.embedded .tracking-title {
+  font-size: 1.6rem;
+}
+
 @media (max-width: 768px) {
   .tracking-details-grid {
     grid-template-columns: 1fr;
