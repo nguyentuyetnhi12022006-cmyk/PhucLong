@@ -6,8 +6,7 @@ const PolicyManager = () => {
   const [activeTab, setActiveTab] = useState('privacy');
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  // Initial Policy Content State
-  const [policies, setPolicies] = useState({
+  const defaultPolicies = {
     privacy: {
       title: 'Chính Sách Bảo Mật Dữ Liệu',
       subtitle: 'Quy định thu thập, mã hóa và bảo vệ thông tin khách hàng',
@@ -22,7 +21,7 @@ const PolicyManager = () => {
         },
         {
           heading: '3. Quy định Tra cứu & Quyền riêng tư',
-          content: 'Khách hàng chưa đăng nhập được phép đặt hàng tự do. Để tra cứu lịch sử đơn hàng, khách hàng phải đăng nhập tài khoản nhằm bảo vệ thông tin cá nhân.'
+          content: 'Khách hàng chưa đăng nhập được phép đặt hàng tự do và tra cứu tiến trình giao hàng trực tiếp bằng Số điện thoại hoặc Mã đơn hàng.'
         },
         {
           heading: '4. Cam kết không chia sẻ thông tin',
@@ -58,6 +57,16 @@ const PolicyManager = () => {
         }
       ]
     }
+  };
+
+  // Initial Policy Content State
+  const [policies, setPolicies] = useState(() => {
+    try {
+      const saved = localStorage.getItem('milktea_custom_policies');
+      return saved ? JSON.parse(saved) : defaultPolicies;
+    } catch {
+      return defaultPolicies;
+    }
   });
 
   const handleSectionChange = (tabKey, index, field, value) => {
@@ -73,6 +82,7 @@ const PolicyManager = () => {
   const handleSave = () => {
     // Save to local storage for persistence across reloads
     localStorage.setItem('milktea_custom_policies', JSON.stringify(policies));
+    window.dispatchEvent(new Event('policy_updated'));
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3000);
   };

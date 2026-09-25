@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Lock, FileText, Truck, CreditCard, UserCheck, HelpCircle, CheckCircle2, Phone, Mail, ChevronRight, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, Lock, FileText, Truck, CreditCard, UserCheck, HelpCircle, CheckCircle2, Phone, Mail, ChevronRight, ArrowLeft, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './PrivacyPolicy.css';
 
@@ -8,6 +8,35 @@ const PrivacyPolicy = () => {
   const { user } = useAuth();
   const isCustomer = user && user.role !== 'admin';
   const [activeTab, setActiveTab] = useState('privacy');
+
+  const [customPolicies, setCustomPolicies] = useState(() => {
+    try {
+      const saved = localStorage.getItem('milktea_custom_policies');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    const handleSync = () => {
+      try {
+        const saved = localStorage.getItem('milktea_custom_policies');
+        if (saved) {
+          setCustomPolicies(JSON.parse(saved));
+        }
+      } catch (err) {
+        console.warn('Could not load custom policies:', err);
+      }
+    };
+
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('policy_updated', handleSync);
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('policy_updated', handleSync);
+    };
+  }, []);
 
   return (
     <div className="privacy-page animate-fade-in">
@@ -43,6 +72,13 @@ const PrivacyPolicy = () => {
             <span>Điều Khoản Sử Dụng</span>
           </button>
           <button
+            className={`tab-btn ${activeTab === 'returns' ? 'active' : ''}`}
+            onClick={() => setActiveTab('returns')}
+          >
+            <RefreshCw size={18} />
+            <span>Đổi Trả & Hoàn Tiền</span>
+          </button>
+          <button
             className={`tab-btn ${activeTab === 'guest' ? 'active' : ''}`}
             onClick={() => setActiveTab('guest')}
           >
@@ -63,77 +99,140 @@ const PrivacyPolicy = () => {
           {/* TAB 1: PRIVACY POLICY */}
           {activeTab === 'privacy' && (
             <div className="tab-pane animate-fade-in">
-              <h2 className="section-heading"><Lock className="icon-heading" /> 1. Thu Thập & Sử Dụng Thông Tin Cá Nhân</h2>
+              <h2 className="section-heading"><Lock className="icon-heading" /> {customPolicies?.privacy?.title || 'Chính Sách Bảo Mật Dữ Liệu'}</h2>
               <p className="lead-text">
-                Chúng tôi hiểu rằng thông tin cá nhân của bạn là tài sản quý giá. Khi sử dụng dịch vụ đặt trà sữa trực tuyến tại Phúc Long, thông tin bạn cung cấp được bảo vệ theo các tiêu chuẩn cao nhất.
+                {customPolicies?.privacy?.subtitle || 'Quy định thu thập, mã hóa và bảo vệ thông tin khách hàng'}
               </p>
 
-              <div className="info-grid-boxes">
-                <div className="info-box">
-                  <h4 className="box-title">📲 Thông tin thu thập khi đặt hàng</h4>
-                  <ul>
-                    <li><strong>Họ và tên:</strong> Để shipper và nhân viên xác nhận đúng người nhận trà sữa.</li>
-                    <li><strong>Số điện thoại:</strong> Để liên hệ giao hàng và làm mã tra cứu trạng thái đơn hàng.</li>
-                    <li><strong>Địa chỉ giao hàng:</strong> Để giao đồ uống tận nơi theo yêu cầu của bạn.</li>
-                    <li><strong>Ghi chú đơn hàng:</strong> Tùy chọn lượng đường, đá, topping hoặc thời gian giao.</li>
-                  </ul>
+              {customPolicies?.privacy?.sections ? (
+                <div className="info-grid-boxes" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {customPolicies.privacy.sections.map((sec, idx) => (
+                    <div key={idx} className="info-box" style={{ width: '100%', padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid var(--color-border-light)' }}>
+                      <h4 className="box-title" style={{ fontSize: '1.15rem', fontWeight: '700', color: 'var(--color-primary-dark)', marginBottom: '10px' }}>
+                        {sec.heading}
+                      </h4>
+                      <p style={{ margin: 0, lineHeight: '1.6', color: 'var(--color-text)', whiteSpace: 'pre-line' }}>
+                        {sec.content}
+                      </p>
+                    </div>
+                  ))}
                 </div>
+              ) : (
+                <div className="info-grid-boxes">
+                  <div className="info-box">
+                    <h4 className="box-title">📲 Thông tin thu thập khi đặt hàng</h4>
+                    <ul>
+                      <li><strong>Họ và tên:</strong> Để shipper và nhân viên xác nhận đúng người nhận trà sữa.</li>
+                      <li><strong>Số điện thoại:</strong> Để liên hệ giao hàng và làm mã tra cứu trạng thái đơn hàng.</li>
+                      <li><strong>Địa chỉ giao hàng:</strong> Để giao đồ uống tận nơi theo yêu cầu của bạn.</li>
+                      <li><strong>Ghi chú đơn hàng:</strong> Tùy chọn lượng đường, đá, topping hoặc thời gian giao.</li>
+                    </ul>
+                  </div>
 
-                <div className="info-box">
-                  <h4 className="box-title">🔒 Mục đích sử dụng thông tin</h4>
-                  <ul>
-                    <li>Xử lý và hoàn tất các đơn hàng trà sữa & cà phê của bạn.</li>
-                    <li>Cập nhật tiến trình giao hàng (Chờ duyệt ➔ Chuẩn bị món ➔ Đang giao ➔ Đã giao).</li>
-                    <li>Giải quyết khiếu nại, hỗ trợ đổi trả hoặc hoàn tiền nếu có sự cố.</li>
-                    <li>Tuyệt đối <strong>KHÔNG</strong> bán, chia sẻ thông tin cho bên thứ ba vì mục đích quảng cáo.</li>
-                  </ul>
+                  <div className="info-box">
+                    <h4 className="box-title">🔒 Mục đích sử dụng thông tin</h4>
+                    <ul>
+                      <li>Xử lý và hoàn tất các đơn hàng trà sữa & cà phê của bạn.</li>
+                      <li>Cập nhật tiến trình giao hàng (Chờ duyệt ➔ Chuẩn bị món ➔ Đang giao ➔ Đã giao).</li>
+                      <li>Giải quyết khiếu nại, hỗ trợ đổi trả hoặc hoàn tiền nếu có sự cố.</li>
+                      <li>Tuyệt đối <strong>KHÔNG</strong> bán, chia sẻ thông tin cho bên thứ ba vì mục đích quảng cáo.</li>
+                    </ul>
+                  </div>
                 </div>
-              </div>
-
-              <h2 className="section-heading spacing-top"><ShieldCheck className="icon-heading" /> 2. Cam Kết Bảo Mật Dữ Liệu Thanh Toán</h2>
-              <p>
-                Dịch vụ thanh toán bằng **Mã QR VietQR (MBBank)** của chúng tôi là dịch vụ chuyển khoản ngân hàng tự động trực tiếp. Hệ thống không lưu trữ mật khẩu ngân hàng, OTP hay thông tin thẻ tín dụng của khách hàng. Số tiền thanh toán được khóa chính xác để đảm bảo bạn không bị chuyển nhầm số tiền.
-              </p>
+              )}
             </div>
           )}
 
           {/* TAB 2: TERMS OF SERVICE */}
           {activeTab === 'terms' && (
             <div className="tab-pane animate-fade-in">
-              <h2 className="section-heading"><FileText className="icon-heading" /> 1. Quy Định Đặt Hàng & Thanh Toán</h2>
+              <h2 className="section-heading"><FileText className="icon-heading" /> {customPolicies?.terms?.title || 'Điều Khoản Sử Dụng Dịch Vụ'}</h2>
               <p className="lead-text">
-                Khi thực hiện giao dịch tại Phúc Long trực tuyến, khách hàng đồng ý với các điều khoản mua hàng dưới đây:
+                {customPolicies?.terms?.subtitle || 'Quy định quyền hạn và trách nhiệm khi sử dụng website đặt hàng'}
               </p>
 
-              <div className="terms-list">
-                <div className="term-item">
-                  <CheckCircle2 size={20} className="check-icon" />
-                  <div>
-                    <strong>Chất lượng sản phẩm:</strong> Đồ uống được pha chế tươi mới tại cửa hàng ngay sau khi đơn hàng được xác nhận.
-                  </div>
+              {customPolicies?.terms?.sections ? (
+                <div className="terms-list">
+                  {customPolicies.terms.sections.map((sec, idx) => (
+                    <div key={idx} className="term-item" style={{ alignItems: 'flex-start' }}>
+                      <CheckCircle2 size={20} className="check-icon" style={{ marginTop: '3px' }} />
+                      <div>
+                        <strong style={{ fontSize: '1.05rem', color: 'var(--color-primary-dark)' }}>{sec.heading}:</strong>
+                        <p style={{ margin: '4px 0 0 0', lineHeight: '1.6', color: 'var(--color-text)', whiteSpace: 'pre-line' }}>{sec.content}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
+              ) : (
+                <div className="terms-list">
+                  <div className="term-item">
+                    <CheckCircle2 size={20} className="check-icon" />
+                    <div>
+                      <strong>Chất lượng sản phẩm:</strong> Đồ uống được pha chế tươi mới tại cửa hàng ngay sau khi đơn hàng được xác nhận.
+                    </div>
+                  </div>
 
-                <div className="term-item">
-                  <CheckCircle2 size={20} className="check-icon" />
-                  <div>
-                    <strong>Phương thức thanh toán:</strong> Hỗ trợ thanh toán bằng **Tiền mặt (COD)** khi nhận hàng hoặc **Quét mã QR VietQR** qua ứng dụng ngân hàng / ví điện tử.
+                  <div className="term-item">
+                    <CheckCircle2 size={20} className="check-icon" />
+                    <div>
+                      <strong>Phương thức thanh toán:</strong> Hỗ trợ thanh toán bằng **Tiền mặt (COD)** khi nhận hàng hoặc **Quét mã QR VietQR** qua ứng dụng ngân hàng / ví điện tử.
+                    </div>
                   </div>
-                </div>
 
-                <div className="term-item">
-                  <CheckCircle2 size={20} className="check-icon" />
-                  <div>
-                    <strong>Hủy đơn hàng:</strong> Khách hàng chỉ có thể tự hủy đơn hàng khi đơn ở trạng thái "Đang chờ duyệt". Khi đơn đã chuyển sang "Chuẩn bị món", vui lòng liên hệ hotline **1800 6179** để hỗ trợ.
+                  <div className="term-item">
+                    <CheckCircle2 size={20} className="check-icon" />
+                    <div>
+                      <strong>Hủy đơn hàng:</strong> Khách hàng chỉ có thể tự hủy đơn hàng khi đơn ở trạng thái "Đang chờ duyệt". Khi đơn đã chuyển sang "Chuẩn bị món", vui lòng liên hệ hotline **1800 6179** để hỗ trợ.
+                    </div>
                   </div>
-                </div>
 
-                <div className="term-item">
-                  <CheckCircle2 size={20} className="check-icon" />
-                  <div>
-                    <strong>Mã giảm giá (Coupon):</strong> Mỗi đơn hàng chỉ áp dụng 1 mã giảm giá hợp lệ thỏa mãn giá trị đơn hàng tối thiểu.
+                  <div className="term-item">
+                    <CheckCircle2 size={20} className="check-icon" />
+                    <div>
+                      <strong>Mã giảm giá (Coupon):</strong> Mỗi đơn hàng chỉ áp dụng 1 mã giảm giá hợp lệ thỏa mãn giá trị đơn hàng tối thiểu.
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 3: RETURNS & REFUNDS */}
+          {activeTab === 'returns' && (
+            <div className="tab-pane animate-fade-in">
+              <h2 className="section-heading"><RefreshCw className="icon-heading" /> {customPolicies?.returns?.title || 'Chính Sách Đổi Trả & Hoàn Tiền'}</h2>
+              <p className="lead-text">
+                {customPolicies?.returns?.subtitle || 'Đảm bảo quyền lợi khách hàng khi gặp sự cố sản phẩm'}
+              </p>
+
+              {customPolicies?.returns?.sections ? (
+                <div className="terms-list">
+                  {customPolicies.returns.sections.map((sec, idx) => (
+                    <div key={idx} className="term-item" style={{ alignItems: 'flex-start' }}>
+                      <CheckCircle2 size={20} className="check-icon" style={{ marginTop: '3px' }} />
+                      <div>
+                        <strong style={{ fontSize: '1.05rem', color: 'var(--color-primary-dark)' }}>{sec.heading}:</strong>
+                        <p style={{ margin: '4px 0 0 0', lineHeight: '1.6', color: 'var(--color-text)', whiteSpace: 'pre-line' }}>{sec.content}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="terms-list">
+                  <div className="term-item">
+                    <CheckCircle2 size={20} className="check-icon" />
+                    <div>
+                      <strong>1. Điều kiện hỗ trợ đổi trả:</strong> Hỗ trợ đổi món mới hoặc hoàn tiền 100% nếu giao sai sản phẩm, thiếu món hoặc món ăn/đồ uống bị đổ vỡ hư hỏng do vận chuyển.
+                    </div>
+                  </div>
+                  <div className="term-item">
+                    <CheckCircle2 size={20} className="check-icon" />
+                    <div>
+                      <strong>2. Thời gian phản hồi:</strong> Khách hàng vui lòng liên hệ Hotline hoặc nhắn tin hỗ trợ trong vòng 30 phút kể từ khi nhận hàng để được giải quyết ngay.
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
