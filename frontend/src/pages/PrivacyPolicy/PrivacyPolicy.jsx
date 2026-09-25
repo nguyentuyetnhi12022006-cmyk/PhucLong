@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, Lock, FileText, Truck, CreditCard, UserCheck, HelpCircle, CheckCircle2, Phone, Mail, ChevronRight, ArrowLeft } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import './PrivacyPolicy.css';
 
 const PrivacyPolicy = () => {
+  const { user } = useAuth();
+  const isCustomer = user && user.role !== 'admin';
   const [activeTab, setActiveTab] = useState('privacy');
 
   return (
@@ -158,7 +161,7 @@ const PrivacyPolicy = () => {
                 </li>
                 <li>
                   <span className="step-num">2</span>
-                  <span><strong>Theo dõi trạng thái:</strong> Để xem và kiểm tra chi tiết trạng thái đơn hàng (Đang chuẩn bị ➔ Đang giao ➔ Đã giao thành công), bạn cần <Link to="/login" className="link-text">Đăng Nhập</Link> tài khoản.</span>
+                  <span><strong>Theo dõi trạng thái:</strong> Khách vãng lai có thể tra cứu chi tiết trạng thái đơn hàng (Chờ xác nhận ➔ Đang pha chế ➔ Đang giao ➔ Đã hoàn thành) bằng Số điện thoại hoặc Mã đơn hàng tại trang <Link to="/tracking" className="link-text">Tra Cứu Đơn Hàng</Link>.</span>
                 </li>
               </ol>
             </div>
@@ -180,7 +183,7 @@ const PrivacyPolicy = () => {
                 <div className="faq-item">
                   <h4 className="faq-question">❓ Tôi chưa đăng nhập thì có xem được trạng thái đơn hàng (Đã giao / Chưa giao) không?</h4>
                   <p className="faq-answer">
-                    Không. Để bảo mật và quản lý chính xác, khách hàng chưa đăng nhập chỉ được phép đặt hàng. Để theo dõi tiến trình giao hàng chi tiết, quý khách vui lòng <strong>Đăng Nhập</strong> tài khoản.
+                    Có! Bạn chỉ cần truy cập trang <strong>Tra Cứu Đơn Hàng</strong> và nhập Số điện thoại hoặc Mã đơn hàng để kiểm tra tiến trình giao hàng trực tiếp.
                   </p>
                 </div>
 
@@ -218,7 +221,7 @@ const PrivacyPolicy = () => {
               <a href="tel:18006179" className="btn btn-primary btn-call">
                 <Phone size={16} /> Hotline: 1800 6179
               </a>
-              <Link to="/profile?tab=track" className="btn btn-outline btn-track">
+              <Link to={isCustomer ? "/profile?tab=track" : "/tracking"} className="btn btn-outline btn-track">
                 <Truck size={16} /> Tra Cứu Đơn Hàng
               </Link>
             </div>

@@ -36,8 +36,10 @@ const UserProfile = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Tab State (default or from location state)
-  const initialTab = location.state?.tab === 'track' ? 'tracking' : (location.state?.tab || 'info');
+  // Tab State (default or from location search/state)
+  const queryParams = new URLSearchParams(location.search);
+  const tabParam = queryParams.get('tab') || location.state?.tab;
+  const initialTab = (tabParam === 'track' || tabParam === 'tracking') ? 'tracking' : (tabParam === 'orders' ? 'orders' : 'info');
   const [activeTab, setActiveTab] = useState(initialTab);
 
   // Password Change State
@@ -75,6 +77,18 @@ const UserProfile = () => {
       navigate('/login', { state: { from: '/profile' } });
       return;
     }
+    const qTab = new URLSearchParams(location.search).get('tab') || location.state?.tab;
+    if (user?.role === 'admin' && (qTab === 'track' || qTab === 'tracking')) {
+      navigate('/tracking');
+      return;
+    }
+
+    if (qTab === 'track' || qTab === 'tracking') {
+      if (activeTab !== 'tracking') setActiveTab('tracking');
+    } else if (qTab === 'orders') {
+      if (activeTab !== 'orders') setActiveTab('orders');
+    }
+
     const isMaster = checkIsMasterAdmin(user);
     if (user?.role === 'admin') {
       if (!isMaster && activeTab !== 'info') {
@@ -86,7 +100,7 @@ const UserProfile = () => {
     if (activeTab === 'orders' && user?.role !== 'admin') {
       fetchMyOrders();
     }
-  }, [isAuthenticated, user, activeTab, navigate]);
+  }, [isAuthenticated, user, activeTab, navigate, location.search, location.state]);
 
   // Real-time Socket.io listener for customer order status changes
   useEffect(() => {

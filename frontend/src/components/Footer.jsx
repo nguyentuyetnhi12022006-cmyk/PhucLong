@@ -1,9 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, MapPin, Mail, Clock } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './Footer.css';
 
 const Footer = () => {
+  const { user } = useAuth();
+  const isCustomer = user && user.role !== 'admin';
+
   return (
     <footer className="footer">
       <div className="container footer-grid">
@@ -25,7 +29,7 @@ const Footer = () => {
             <li><Link to="/">Trang Chủ</Link></li>
             <li><Link to="/menu">Thực Đơn</Link></li>
             <li><Link to="/cart">Giỏ Hàng</Link></li>
-            <li><Link to="/profile?tab=track">Tra Cứu Đơn Hàng</Link></li>
+            <li><Link to={isCustomer ? "/profile?tab=track" : "/tracking"}>Tra Cứu Đơn Hàng</Link></li>
             <li><Link to="/privacy">Chính Sách & Quyền Riêng Tư</Link></li>
           </ul>
         </div>

@@ -12,7 +12,7 @@ const menuHoursAgo = (h) => new Date(Date.now() - h * 60 * 60 * 1000).toISOStrin
 // Fallback menu data in case the database is not seeded/running
 const FALLBACK_PRODUCTS = [
   {
-    _id: 'fb-ts-1',
+    _id: '650000000000000000000001',
     name: 'Trà Sữa Phúc Long',
     description: 'Trà sữa Phúc Long đậm vị trà đặc trưng kết hợp cùng sữa béo ngậy hảo hạng.',
     price: 45000,
@@ -30,7 +30,7 @@ const FALLBACK_PRODUCTS = [
     updatedAt: menuHoursAgo(2)
   },
   {
-    _id: 'fb-ts-2',
+    _id: '650000000000000000000002',
     name: 'Trà Thiết Quan Âm',
     description: 'Hương vị trà Thiết Quan Âm thanh tao kết hợp cùng sữa béo nhẹ ngọt thanh thơm mát.',
     price: 48000,
@@ -41,7 +41,7 @@ const FALLBACK_PRODUCTS = [
     isAvailable: true
   },
   {
-    _id: 'fb-tc-1',
+    _id: '650000000000000000000003',
     name: 'Trà Đào Phúc Long',
     description: 'Trà đen đậm đà kết hợp với syrup đào thanh ngọt và những miếng đào giòn thơm.',
     price: 50000,
@@ -55,7 +55,7 @@ const FALLBACK_PRODUCTS = [
     updatedAt: menuHoursAgo(26)
   },
   {
-    _id: 'fb-tc-2',
+    _id: '650000000000000000000004',
     name: 'Trà Nhãn Sen',
     description: 'Sự kết hợp tinh tế giữa hồng trà thanh nhẹ, hạt sen bùi bùi và nhãn lồng ngọt lịm.',
     price: 55000,
@@ -66,7 +66,7 @@ const FALLBACK_PRODUCTS = [
     isAvailable: true
   },
   {
-    _id: 'fb-cf-1',
+    _id: '650000000000000000000005',
     name: 'Cà Phê Sữa Đá',
     description: 'Cà phê Espresso Robusta nguyên chất từ Tây Nguyên quyện cùng sữa đặc béo ngậy truyền thống.',
     price: 35000,
@@ -78,7 +78,7 @@ const FALLBACK_PRODUCTS = [
     isFeatured: true
   },
   {
-    _id: 'fb-dx-1',
+    _id: '650000000000000000000006',
     name: 'Matcha Đá Xay',
     description: 'Bột trà xanh Nhật Bản cao cấp đá xay mát lạnh, phủ kem tươi mịn màng.',
     price: 59000,
@@ -92,7 +92,7 @@ const FALLBACK_PRODUCTS = [
     updatedAt: menuHoursAgo(150)
   },
   {
-    _id: 'fb-bn-1',
+    _id: '650000000000000000000007',
     name: 'Bánh Croissant Bơ Tỏi',
     description: 'Bánh sừng bò ngàn lớp thơm phức mùi bơ và sốt tỏi nướng thơm lừng giòn tan.',
     price: 29000,
@@ -103,7 +103,7 @@ const FALLBACK_PRODUCTS = [
     isAvailable: true
   },
   {
-    _id: 'fb-bn-2',
+    _id: '650000000000000000000008',
     name: 'Bánh Tiramisu',
     description: 'Bánh kem lạnh vị cà phê và rượu nhẹ thơm ngon, mềm mịn tan ngay trong miệng.',
     price: 38000,

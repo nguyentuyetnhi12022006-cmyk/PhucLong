@@ -18,7 +18,7 @@ const { protect, admin } = require('../middleware/auth');
 router.post('/guest', createGuestOrder);
 router.get('/track', trackOrder);
 router.post('/:id/verify-payment', protect, admin, verifyPayment);
-router.post('/:id/mark-sent-money', protect, markSentMoney);
+router.post('/:id/mark-sent-money', markSentMoney);
 
 router.route('/')
   .post(createOrder)

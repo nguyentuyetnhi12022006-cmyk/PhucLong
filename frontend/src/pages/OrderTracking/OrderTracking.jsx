@@ -81,13 +81,12 @@ const OrderTracking = ({ embedded = false }) => {
 
   // Auto trigger search on mount if URL params exist
   useEffect(() => {
-    if (!isAuthenticated) return;
     const q = initialId || initialPhone;
     if (q) {
       setSearchInput(q);
       fetchTracking(q);
     }
-  }, [initialId, initialPhone, isAuthenticated]);
+  }, [initialId, initialPhone]);
 
   const handleSearchSubmit = (e) => {
     if (e && e.preventDefault) e.preventDefault();
@@ -171,32 +170,7 @@ const OrderTracking = ({ embedded = false }) => {
     }
   };
 
-  // IF GUEST (NOT LOGGED IN), REQUIRE LOGIN TO VIEW ORDER STATUS
-  if (!isAuthenticated) {
-    return (
-      <div className="order-tracking-page animate-fade-in" style={{ padding: '60px 0' }}>
-        <div className="container tracking-container">
-          <div className="tracking-empty-box" style={{ padding: '60px 24px', textAlign: 'center', background: '#ffffff', borderRadius: '24px', border: '1px solid var(--color-border-light)', boxShadow: '0 10px 30px rgba(0,0,0,0.06)', maxWidth: '680px', margin: '0 auto' }}>
-            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(12, 81, 63, 0.08)', color: 'var(--color-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
-              <Lock size={42} />
-            </div>
-            <h2 style={{ fontSize: '1.8rem', color: 'var(--color-primary-dark)', marginBottom: '16px', fontWeight: '750' }}>Vui Lòng Đăng Nhập Để Xem Trạng Thái Đơn Hàng</h2>
-            <p style={{ fontSize: '1rem', color: 'var(--color-text-light)', maxWidth: '520px', margin: '0 auto 32px auto', lineHeight: '1.6' }}>
-              Khách hàng chưa đăng nhập có thể đặt hàng bình thường. Tuy nhiên, để xem và theo dõi chi tiết trạng thái đơn hàng (Đang giao hay Đã giao thành công), vui lòng <strong>Đăng Nhập</strong> vào tài khoản của bạn.
-            </p>
-            <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link to="/login" className="btn btn-primary" style={{ padding: '12px 32px', fontSize: '1rem', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <User size={18} /> Đăng Nhập Ngay
-              </Link>
-              <Link to="/menu" className="btn btn-outline" style={{ padding: '12px 24px', fontSize: '1rem' }}>
-                Tiếp Tục Đặt Hàng
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className={`order-tracking-page animate-fade-in ${embedded ? 'embedded' : ''}`}>

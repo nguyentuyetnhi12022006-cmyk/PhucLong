@@ -11,6 +11,7 @@ import Cart from './pages/Cart/Cart';
 import Checkout from './pages/Checkout/Checkout';
 import LoginRegister from './pages/Auth/LoginRegister';
 import UserProfile from './pages/Profile/UserProfile';
+import OrderTracking from './pages/OrderTracking/OrderTracking';
 import PrivacyPolicy from './pages/PrivacyPolicy/PrivacyPolicy';
 import AdminLogin from './pages/Admin/AdminLogin';
 import AdminLayout from './pages/Admin/AdminLayout';
@@ -64,8 +65,8 @@ function App() {
               <Route path="login" element={<LoginRegister />} />
               <Route path="profile" element={<UserProfile />} />
               <Route path="my-orders" element={<UserProfile />} />
-              {/* Order tracking now lives inside the Profile's "Tra Cứu Đơn Hàng" tab */}
-              <Route path="tracking" element={<Navigate to="/profile?tab=track" replace />} />
+              {/* Standalone Order Tracking page for guest & direct access */}
+              <Route path="tracking" element={<OrderTracking />} />
               <Route path="privacy" element={<PrivacyPolicy />} />
               <Route path="terms" element={<PrivacyPolicy />} />
             </Route>

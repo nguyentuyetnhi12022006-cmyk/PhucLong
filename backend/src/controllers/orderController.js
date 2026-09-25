@@ -1,21 +1,52 @@
+const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Notification = require('../models/Notification');
 const jwt = require('jsonwebtoken');
+const Product = require('../models/Product');
 
 // Normalize order items: toppings may arrive as plain strings (from the frontend
 // cart) or as { name, price } objects. Convert strings to objects so the Order
-// model validation passes, and ensure every item has a sane positive price.
-const normalizeItems = (items = []) => {
-  return items.map((item) => ({
-    ...item,
-    price: Number(item.price) > 0 ? Number(item.price) : 0,
-    quantity: Number(item.quantity) > 0 ? Number(item.quantity) : 1,
-    toppings: Array.isArray(item.toppings)
-      ? item.toppings.map((t) =>
-          typeof t === 'string' ? { name: t, price: 0 } : { ...t }
-        )
-      : [],
-  }));
+// model validation passes, and ensure every item has a sane positive price and valid ObjectId product.
+const normalizeItems = async (items = []) => {
+  return Promise.all(
+    items.map(async (item) => {
+      let productId = item.product || item._id;
+
+      // Ensure product is a valid 24-character hex ObjectId
+      if (!productId || typeof productId !== 'string' || !mongoose.Types.ObjectId.isValid(productId)) {
+        // Try looking up a real Product in MongoDB by name
+        if (item.name) {
+          try {
+            const match = await Product.findOne({
+              name: { $regex: new RegExp(`^${item.name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+            });
+            if (match) {
+              productId = match._id;
+            }
+          } catch (e) {
+            console.warn('Error finding product by name:', e.message);
+          }
+        }
+        // If still invalid (e.g. 'fb-cf-1'), generate a valid fallback ObjectId
+        if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
+          productId = new mongoose.Types.ObjectId();
+        }
+      }
+
+      return {
+        product: productId,
+        name: item.name || 'Sản phẩm',
+        price: Number(item.price) > 0 ? Number(item.price) : 0,
+        size: item.size || 'M',
+        quantity: Number(item.quantity) > 0 ? Number(item.quantity) : 1,
+        toppings: Array.isArray(item.toppings)
+          ? item.toppings.map((t) =>
+              typeof t === 'string' ? { name: t, price: 0 } : { ...t }
+            )
+          : [],
+      };
+    })
+  );
 };
 
 // Helper: verify a Bearer token and return the user id (or null)
@@ -93,13 +124,15 @@ const createOrder = async (req, res) => {
   }
 
   try {
+    const sanitizedItems = await normalizeItems(items);
+
     const order = await Order.create({
       user: userId,
       customerName,
       customerPhone,
       shippingAddress,
       notes,
-      items: normalizeItems(items),
+      items: sanitizedItems,
       totalAmount: Number(totalAmount),
       couponCode,
       discountAmount,
@@ -426,7 +459,7 @@ const createGuestOrder = async (req, res) => {
       customerPhone,
       shippingAddress,
       notes: notes || '',
-      items: normalizeItems(items),
+      items: await normalizeItems(items),
       totalAmount: Number(totalAmount) || 0,
       couponCode: couponCode || null,
       discountAmount: discountAmount || 0,

@@ -59,7 +59,8 @@ const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = fa
     // Notify the backend that the customer has transferred money so the
     // tracking page shows "ĐÃ CHUYỂN KHOẢN — CHỜ XÁC NHẬN" instead of
     // "CHƯA THANH TOÁN" until an admin confirms the payment.
-    if (isAuthenticated && paymentStatus !== 'Paid' && paymentStatus !== 'AwaitingConfirm') {
+    if (paymentStatus !== 'Paid' && paymentStatus !== 'AwaitingConfirm') {
+      setPaymentStatus('AwaitingConfirm');
       setConfirming(true);
       try {
         await api.post(`/orders/${orderId}/mark-sent-money`);
@@ -69,8 +70,6 @@ const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = fa
         setConfirming(false);
       }
     }
-
-    navigate(`/profile?tab=track&id=${orderId}`);
   };
 
   const isExpired = timeLeft <= 0;
@@ -103,6 +102,14 @@ const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = fa
             <p>Hệ thống đã ghi nhận số tiền {formatPrice(amount)}. Đơn hàng đang được chuẩn bị.</p>
           </div>
         </div>
+      ) : paymentStatus === 'AwaitingConfirm' ? (
+        <div className="qr-paid-success-banner" style={{ background: '#fef3c7', borderColor: '#f59e0b', color: '#92400e' }}>
+          <CheckCircle2 size={24} color="#f59e0b" />
+          <div>
+            <strong>🟡 ĐÃ GHI NHẬN CHUYỂN KHOẢN!</strong>
+            <p>Hệ thống đã ghi nhận bạn bấm "Tôi đã thanh toán". Quản trị viên sẽ sớm kiểm tra và xác nhận giao dịch.</p>
+          </div>
+        </div>
       ) : (
         <>
           <div className="qr-waiting-status">
@@ -128,9 +135,9 @@ const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = fa
         {/* Left: Large QR Image Display */}
         <div className="qr-image-column">
           <div className={`qr-large-frame ${isExpired && !isPaid ? 'frame-expired' : ''} ${isPaid ? 'frame-paid' : ''}`}>
-            <img 
-              src={qrUrl} 
-              alt="Mã VietQR Thanh Toán" 
+            <img
+              src={qrUrl}
+              alt="Mã VietQR Thanh Toán"
               className="qr-large-image"
               onError={(e) => {
                 e.target.onerror = null;
@@ -170,9 +177,9 @@ const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = fa
               <span className="lbl">Số tài khoản:</span>
               <div className="val-copy-group">
                 <strong className="acc-number">{BANK_CONFIG.accountNo}</strong>
-                <button 
+                <button
                   type="button"
-                  className="btn-copy-mini" 
+                  className="btn-copy-mini"
                   onClick={() => handleCopy(BANK_CONFIG.accountNo, 'acc')}
                 >
                   {copiedAcc ? <Check size={14} /> : <Copy size={14} />}
@@ -195,9 +202,9 @@ const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = fa
               <span className="lbl">Nội dung CK:</span>
               <div className="val-copy-group">
                 <strong className="content-code">{transferContent}</strong>
-                <button 
+                <button
                   type="button"
-                  className="btn-copy-mini" 
+                  className="btn-copy-mini"
                   onClick={() => handleCopy(transferContent, 'content')}
                 >
                   {copiedContent ? <Check size={14} /> : <Copy size={14} />}
@@ -213,9 +220,10 @@ const QRPaymentModal = ({ amount, orderId, customerPhone, onClose, isInline = fa
                 type="button"
                 className="qr-payment-confirm-button"
                 onClick={handlePaymentConfirmation}
-                disabled={!orderId || confirming}
+                disabled={!orderId || confirming || paymentStatus === 'AwaitingConfirm'}
+                style={paymentStatus === 'AwaitingConfirm' ? { backgroundColor: '#059669', borderColor: '#059669', color: '#ffffff', cursor: 'default' } : {}}
               >
-                {confirming ? 'Đang ghi nhận...' : 'Tôi đã thanh toán'}
+                {confirming ? 'Đang ghi nhận...' : paymentStatus === 'AwaitingConfirm' ? '✓ Đã Báo Thanh Toán (Chờ Xác Nhận)' : 'Tôi đã thanh toán'}
               </button>
             </div>
           ) : (
